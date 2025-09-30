@@ -1,16 +1,20 @@
 server:
-  port: ${SERVER_PORT}
-
+  port: 8080
+dotenv:
+  enabled: true
 spring:
   application:
     name: First-Passport
   datasource:
-    url: ${DATABASE_URL}
-    username: ${USERNAME}
-    password: ${PASSWORD}
-    driver-class-name: oracle.jdbc.OracleDriver
+    url: ${ORACLE_DB_URL}
+    username: ${ORACLE_DB_USERNAME}
+    password: ${ORACLE_DB_PASSWORD}
+    driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
-    database-platform: org.hibernate.dialect.OracleDialect
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
