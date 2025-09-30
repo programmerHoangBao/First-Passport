@@ -57,9 +57,9 @@
       <version>19.11.0.0</version>
     </dependency>
     <dependency>
-      <groupId>io.github.cdimascio</groupId>
-      <artifactId>dotenv-java</artifactId>
-      <version>3.0.2</version>
+      <groupId>me.paulschwarz</groupId>
+      <artifactId>spring-dotenv</artifactId>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.persistence</groupId>
