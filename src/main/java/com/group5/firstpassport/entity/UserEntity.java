@@ -3,6 +3,7 @@ package com.group5.firstpassport.entity;
 import com.group5.firstpassport.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
