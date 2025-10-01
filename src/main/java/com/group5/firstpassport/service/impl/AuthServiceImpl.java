@@ -1,65 +1,52 @@
-package com.group5.firstpassport.service.Impl;
+package com.group5.firstpassport.service.impl;
 
 import com.group5.firstpassport.dto.request.LoginRequest;
 import com.group5.firstpassport.dto.response.LoginResponse;
 import com.group5.firstpassport.entity.UserEntity;
+import com.group5.firstpassport.enums.ErrorCode;
+import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.UserRepository;
 import com.group5.firstpassport.service.IAuthService;
 import com.group5.firstpassport.util.JwtUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-
     UserRepository userRepository;
-
     AuthenticationManager authenticationManager;
 
-    JwtUtil jwtUtil;
-
     @Override
-    public LoginResponse login(LoginRequest reqDTO) {
+    public LoginResponse login(LoginRequest loginRequest) {
+        Optional<UserEntity> existedUser = userRepository.findByUsername(loginRequest.getUsername());
 
-
-        UserEntity existedUser = userRepository.findByUsername(reqDTO.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException(reqDTO.getUsername()));
-
-        if (existedUser.getId() == null) {
-
-            throw new UsernameNotFoundException("Username not found");
-
+        if (existedUser.isEmpty()) {
+            throw new BadRequestException(ErrorCode.USER_NO_EXIST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(reqDTO.getUsername(), reqDTO.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         if (authentication.isAuthenticated()) {
-
-            String accessToken = jwtUtil.generateToken(reqDTO.getUsername());
-            String refreshToken = jwtUtil.generateRefreshToken(reqDTO.getUsername());
+            String accessToken = JwtUtil.generateToken(loginRequest.getUsername());
+            String refreshToken = JwtUtil.generateRefreshToken(loginRequest.getUsername());
 
             return LoginResponse.builder()
+                    .userId(existedUser.get().getId())
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
-                    .userId(existedUser.getId())
                     .build();
-
         }
-
-        return null;
+        throw new BadRequestException(ErrorCode.LOGIN_FAILED);
     }
 }

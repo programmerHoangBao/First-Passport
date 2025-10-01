@@ -4,6 +4,8 @@ dotenv:
   enabled: true
 jwt:
   secret: ${SECRET_KEY}
+  token-expiration-ms: ${TOKEN_EXPIRATION_MS}
+  refresh-expiration-ms: ${REFRESH_EXPIRATION_MS}
 spring:
   application:
     name: First-Passport
