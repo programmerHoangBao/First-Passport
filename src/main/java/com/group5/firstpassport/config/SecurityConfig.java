@@ -35,7 +35,7 @@ public class SecurityConfig {
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/login").permitAll()
+                        .requestMatchers("/first-passport/login").permitAll()
 
                         // Role-based endpoints
                         .requestMatchers("/api/xt/**").hasRole("XT")

@@ -1,9 +1,11 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT}
 dotenv:
   enabled: true
 jwt:
   secret: ${SECRET_KEY}
+  token-expiration-ms: ${TOKEN_EXPIRATION_MS}
+  refresh-expiration-ms: ${REFRESH_EXPIRATION_MS}
 spring:
   application:
     name: First-Passport
@@ -20,3 +22,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    schemas: ${ORACLE_DB_USERNAME}

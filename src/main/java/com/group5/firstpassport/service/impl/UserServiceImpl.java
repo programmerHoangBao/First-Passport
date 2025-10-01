@@ -1,4 +1,4 @@
-package com.group5.firstpassport.service.Impl;
+package com.group5.firstpassport.service.impl;
 
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.repository.UserRepository;
