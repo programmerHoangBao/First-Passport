@@ -1,7 +1,5 @@
 package com.group5.firstpassport.config;
 
-import com.group5.firstpassport.filter.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +14,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.group5.firstpassport.filter.JwtAuthFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @EnableWebSecurity
 @Configuration
@@ -37,6 +39,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/first-passport/login").permitAll()
                         .requestMatchers("/first-passport/register").permitAll()
+                        .requestMatchers("/first-passport/view-all-registration").permitAll()
                         .requestMatchers("/first-passport/approval").permitAll()
 
                         // Role-based endpoints

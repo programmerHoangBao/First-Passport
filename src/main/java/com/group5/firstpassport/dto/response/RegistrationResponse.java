@@ -1,12 +1,13 @@
 package com.group5.firstpassport.dto.response;
 
+import java.time.LocalDateTime;
+
 import com.group5.firstpassport.enums.Gender;
 import com.group5.firstpassport.enums.Status;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
