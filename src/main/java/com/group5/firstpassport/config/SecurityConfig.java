@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/first-passport/login").permitAll()
                         .requestMatchers("/first-passport/register").permitAll()
                         .requestMatchers("/first-passport/view-all-registration").permitAll()
+                        .requestMatchers("/first-passport/approval").permitAll()
 
                         // Role-based endpoints
                         .requestMatchers("/api/xt/**").hasRole("XT")
