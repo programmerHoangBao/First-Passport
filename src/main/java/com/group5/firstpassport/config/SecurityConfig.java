@@ -41,7 +41,7 @@ public class SecurityConfig {
 
                         // Role-based endpoints
                         .requestMatchers("/api/xt/**").hasRole("XT")
-                        .requestMatchers("/api/xf/**").hasRole("XD")
+                        .requestMatchers("/api/xd/**").hasRole("XD")
                         .requestMatchers("/api/lt/**").hasRole("LT")
                         .requestMatchers("/api/gs/**").hasRole("GS")
 
