@@ -1,11 +1,11 @@
 INSERT INTO USERS (ID, FULL_NAME, USERNAME, PASSWORD, ROLE) 
-VALUES (1, 'Nguyen Hoang Bao', 'BAO', '123', 'XT');
+VALUES (1, 'Nguyen Hoang Bao', 'BAO', '$2a$12$kxLZRZupmj1jnG5cb4fCiu2sMyU6C4wEIIocCjF4PcRwMIStsd21O', 'XT');
 
 INSERT INTO USERS (ID, FULL_NAME, USERNAME, PASSWORD, ROLE)
-VALUES (2, 'Tran Thi Kim Chung', 'CHUNG', '123', 'XD');
+VALUES (2, 'Tran Thi Kim Chung', 'CHUNG', '$2a$12$kxLZRZupmj1jnG5cb4fCiu2sMyU6C4wEIIocCjF4PcRwMIStsd21O', 'XD');
 
 INSERT INTO USERS (ID, FULL_NAME, USERNAME, PASSWORD, ROLE)
-VALUES (3, 'Luu Thanh La', 'THANHLA', '123', 'LT');
+VALUES (3, 'Luu Thanh La', 'THANHLA', '$2a$12$kxLZRZupmj1jnG5cb4fCiu2sMyU6C4wEIIocCjF4PcRwMIStsd21O', 'LT');
 
 INSERT INTO USERS (ID, FULL_NAME, USERNAME, PASSWORD, ROLE)
-VALUES (4, 'Ngo Trung Hieu', 'HIEU', '123', 'GS');
+VALUES (4, 'Ngo Trung Hieu', 'HIEU', '$2a$12$kxLZRZupmj1jnG5cb4fCiu2sMyU6C4wEIIocCjF4PcRwMIStsd21O', 'GS');
