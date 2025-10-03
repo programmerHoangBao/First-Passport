@@ -1,10 +1,11 @@
 package com.group5.firstpassport.enums;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 @Getter
@@ -22,7 +23,9 @@ public enum ErrorCode {
   USER_NO_EXIST(1108, "User with this id does not exist", HttpStatus.NOT_FOUND),
   LOGIN_FAILED(1109, "Login failed", HttpStatus.UNAUTHORIZED),
   RESIDENT_NOT_FOUND(1110, "Resident not found", HttpStatus.NOT_FOUND),
-    OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+  NO_DATA(1111, "No data", HttpStatus.NOT_FOUND),
+  OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+
 
   private final int responseCode;
   private final String message;
