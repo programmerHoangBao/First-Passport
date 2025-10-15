@@ -34,10 +34,10 @@ public class ApprovalServiceImpl implements IApprovalService {
   public ApprovalResponse approval(ApprovalRequest approvalRequest) {
     Optional<RegistrationEntity> existsRegistration = registrationRepository.findById(approvalRequest.getFormId());
     Optional<UserEntity> existsUser = userRepository.findById(approvalRequest.getApproverBy());
-    if (!existsRegistration.isEmpty()) {
+    if (!existsRegistration.isPresent()) {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
     }
-    if (!existsUser.isEmpty()) {
+    if (!existsUser.isPresent()) {
       throw new BadRequestException(ErrorCode.USER_NO_EXIST);
     }
 
@@ -50,5 +50,4 @@ public class ApprovalServiceImpl implements IApprovalService {
     approvalResponse.setApproverBy(approvalSaved.getApproverBy().getId());
     return approvalResponse;
   }
-
 }

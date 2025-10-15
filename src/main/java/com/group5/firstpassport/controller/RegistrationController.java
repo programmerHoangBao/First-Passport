@@ -24,14 +24,14 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @RequestMapping("/first-passport")
 public class RegistrationController {
-    RegistrationServiceImpl registrationService;
-    @PostMapping("/register")
-    public ResponseEntity<RegistrationResponse> registration(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        return ResponseEntity.ok(registrationService.registration(registrationRequest));
-    }
-    @GetMapping("/view-all-registration")
-    public ResponseEntity<Page<ViewAllRegistrationResponse>> findAll(@RequestParam int pageSize, @RequestParam int pageNumber) {
-        return ResponseEntity.ok(registrationService.findAll(pageSize, pageNumber));
-    }
+  RegistrationServiceImpl registrationService;
 
+  @PostMapping("/register")
+  public ResponseEntity<RegistrationResponse> registration(@Valid @RequestBody RegistrationRequest registrationRequest) {
+    return ResponseEntity.ok(registrationService.registration(registrationRequest));
+  }
+  @GetMapping("/view-all-registration")
+  public ResponseEntity<Page<ViewAllRegistrationResponse>> findAll(@RequestParam int pageSize, @RequestParam int pageNumber) {
+    return ResponseEntity.ok(registrationService.findAll(pageSize, pageNumber));
+  }
 }

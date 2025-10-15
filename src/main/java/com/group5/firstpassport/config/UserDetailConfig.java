@@ -11,53 +11,53 @@ import java.util.List;
 public class UserDetailConfig implements UserDetails {
 
 
-    private String username; // Changed from 'name' to 'email' for clarity
-    private String password;
-    private GrantedAuthority authority;
+  private String username; // Changed from 'name' to 'email' for clarity
+  private String password;
+  private GrantedAuthority authority;
 
-    public UserDetailConfig(UserEntity userEntity) {
-        this.username = userEntity.getUsername(); // Use gmail as username
-        this.password = userEntity.getPassword();
-        this.authority = new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name());
-    }
+  public UserDetailConfig(UserEntity userEntity) {
+    this.username = userEntity.getUsername(); // Use gmail as username
+    this.password = userEntity.getPassword();
+    this.authority = new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name());
+  }
 
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(authority);
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(authority);
+  }
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
+  @Override
+  public String getPassword() {
+    return password;
+  }
 
-    @Override
-    public String getUsername() {
-        return username;
-    }
+  @Override
+  public String getUsername() {
+    return username;
+  }
 
-    @Override
-    public boolean isAccountNonExpired() {
+  @Override
+  public boolean isAccountNonExpired() {
 //        return UserDetails.super.isAccountNonExpired();
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public boolean isAccountNonLocked() {
+  @Override
+  public boolean isAccountNonLocked() {
 //        return UserDetails.super.isAccountNonLocked();
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
+  @Override
+  public boolean isCredentialsNonExpired() {
 //        return UserDetails.super.isCredentialsNonExpired();
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public boolean isEnabled() {
+  @Override
+  public boolean isEnabled() {
 //        return UserDetails.super.isEnabled();
-        return true;
-    }
+    return true;
+  }
 }

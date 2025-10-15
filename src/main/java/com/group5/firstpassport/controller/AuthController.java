@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/first-passport")
 public class AuthController {
 
-    AuthServiceImpl authService;
+  AuthServiceImpl authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest reqDTO) {
-        return ResponseEntity.ok(authService.login(reqDTO));
-    }
+  @PostMapping("/login")
+  public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest reqDTO) {
+    return ResponseEntity.ok(authService.login(reqDTO));
+  }
 }
