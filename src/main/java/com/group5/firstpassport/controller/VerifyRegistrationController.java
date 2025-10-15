@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +16,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/xt")
 public class VerifyRegistrationController {
 
-    VerifyRegistrationServiceImpl verifyRegistrationService;
+  VerifyRegistrationServiceImpl verifyRegistrationService;
 
-    @GetMapping("/registrations")
-    public ResponseEntity<Page<RegistrationResponse>> getAllRegistration(Pageable pageable) {
-        return ResponseEntity.ok(verifyRegistrationService.getRegistrations(pageable));
-    }
+  @GetMapping("/registrations")
+  public ResponseEntity<Page<RegistrationResponse>> getAllRegistration(Pageable pageable) {
+    return ResponseEntity.ok(verifyRegistrationService.getRegistrations(pageable));
+  }
 
-    @PostMapping("/verify-registration/{id}")
-    public ResponseEntity<RegistrationResponse> verifyRegistration(@PathVariable Long id) {
-        return ResponseEntity.ok(verifyRegistrationService.verifyRegistration(id));
-    }
+  @PostMapping("/verify-registration/{id}")
+  public ResponseEntity<RegistrationResponse> verifyRegistration(@PathVariable Long id) {
+    return ResponseEntity.ok(verifyRegistrationService.verifyRegistration(id));
+  }
 }

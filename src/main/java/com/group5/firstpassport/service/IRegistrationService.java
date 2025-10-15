@@ -7,6 +7,6 @@ import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
 
 public interface IRegistrationService {
-    RegistrationResponse registration(RegistrationRequest registrationRequest);
-    Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber);
+  RegistrationResponse registration(RegistrationRequest registrationRequest);
+  Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber);
 }

@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ResidentRepository extends JpaRepository<ResidentEntity,String> {
-    boolean existsByIdentityNumber(String identityNumber);
-    Optional<ResidentEntity> findByIdentityNumber(String identityNumber);
+  boolean existsByIdentityNumber(String identityNumber);
+  Optional<ResidentEntity> findByIdentityNumber(String identityNumber);
 }

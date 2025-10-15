@@ -24,75 +24,75 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final UserDetailsService userDetailsService;
+  private final JwtAuthFilter jwtAuthFilter;
+  private final UserDetailsService userDetailsService;
 
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // Disable CSRF (not needed for stateless JWT)
-                .csrf(csrf -> csrf.disable())
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+            // Disable CSRF (not needed for stateless JWT)
+            .csrf(csrf -> csrf.disable())
 
-                // Configure endpoint authorization
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/first-passport/login").permitAll()
-                        .requestMatchers("/first-passport/register").permitAll()
-                        .requestMatchers("/first-passport/view-all-registration").permitAll()
-                        .requestMatchers("/first-passport/approval").permitAll()
+            // Configure endpoint authorization
+            .authorizeHttpRequests(auth -> auth
+                    // Public endpoints
+                    .requestMatchers("/first-passport/login").permitAll()
+                    .requestMatchers("/first-passport/register").permitAll()
+                    .requestMatchers("/first-passport/view-all-registration").permitAll()
+                    .requestMatchers("/first-passport/approval").permitAll()
 
-                        // Role-based endpoints
-                        .requestMatchers("/api/xt/**").hasRole("XT")
-                        .requestMatchers("/api/xd/**").hasRole("XD")
-                        .requestMatchers("/api/lt/**").hasRole("LT")
-                        .requestMatchers("/api/gs/**").hasRole("GS")
+                    // Role-based endpoints
+                    .requestMatchers("/api/xt/**").hasRole("XT")
+                    .requestMatchers("/api/xd/**").hasRole("XD")
+                    .requestMatchers("/api/lt/**").hasRole("LT")
+                    .requestMatchers("/api/gs/**").hasRole("GS")
 
 
-                        // All other endpoints require authentication
-                        .requestMatchers("/api/users/**").authenticated()
-                        .anyRequest().authenticated()
-                )
+                    // All other endpoints require authentication
+                    .requestMatchers("/api/users/**").authenticated()
+                    .anyRequest().authenticated()
+            )
 
-                // Stateless session (required for JWT)
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Stateless session (required for JWT)
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Set custom authentication provider
-                .authenticationProvider(authenticationProvider())
+            // Set custom authentication provider
+            .authenticationProvider(authenticationProvider())
 
-                // Add JWT filter before Spring Security's default filter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            // Add JWT filter before Spring Security's default filter
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+  }
 
-    /*
-     * Password encoder bean (uses BCrypt hashing)
-     * Critical for secure password storage
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  /*
+   * Password encoder bean (uses BCrypt hashing)
+   * Critical for secure password storage
+   */
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    /*
-     * Authentication provider configuration
-     * Links UserDetailsService and PasswordEncoder
-     */
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
+  /*
+   * Authentication provider configuration
+   * Links UserDetailsService and PasswordEncoder
+   */
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+    provider.setUserDetailsService(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder());
+    return provider;
+  }
 
-    /*
-     * Authentication manager bean
-     * Required for programmatic authentication (e.g., in /generateToken)
-     */
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+  /*
+   * Authentication manager bean
+   * Required for programmatic authentication (e.g., in /generateToken)
+   */
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    return config.getAuthenticationManager();
+  }
 }

@@ -1,5 +1,7 @@
 package com.group5.firstpassport.service.impl;
 
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,12 +32,14 @@ public class RegistrationServiceImpl implements IRegistrationService {
   RegistrationRepository registrationRepository;
   ResidentRepository residentRepository;
   ModelMapper modelMapper;
+  
   @Override
   public RegistrationResponse registration(RegistrationRequest registrationRequest) {
-      if (!residentRepository.existsByIdentityNumber(registrationRequest.getIdentityNumber())) {
+      Optional<ResidentEntity> residentEntityOptional = residentRepository.findByIdentityNumber(registrationRequest.getIdentityNumber());
+      if (!residentEntityOptional.isPresent()) {
         throw new BadRequestException(ErrorCode.RESIDENT_NOT_FOUND);
       }
-      ResidentEntity residentEntity = residentRepository.findByIdentityNumber(registrationRequest.getIdentityNumber()).get();
+      ResidentEntity residentEntity = residentEntityOptional.get();
       RegistrationEntity registrationInput = modelMapper.map(registrationRequest, RegistrationEntity.class);
       registrationInput.setResident(residentEntity);
       RegistrationEntity registrationSave = registrationRepository.save(registrationInput);
@@ -43,7 +47,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
   }
 
   @Override
-public Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber) {
+  public Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
     Page<RegistrationEntity> registrationEntities = registrationRepository.findAll(pageable);
 

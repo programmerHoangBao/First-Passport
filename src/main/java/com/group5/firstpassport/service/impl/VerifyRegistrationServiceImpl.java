@@ -25,38 +25,38 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class VerifyRegistrationServiceImpl implements IVerifyRegistrationService {
-    RegistrationRepository registrationRepository;
-    ResidentRepository residentRepository;
-    ModelMapper modelMapper;
+  RegistrationRepository registrationRepository;
+  ResidentRepository residentRepository;
+  ModelMapper modelMapper;
 
-    @Override
-    public RegistrationResponse verifyRegistration(Long id) {
+  @Override
+  public RegistrationResponse verifyRegistration(Long id) {
 
-        RegistrationEntity form_registration = registrationRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND));
-        ResidentEntity resident = residentRepository.findById(form_registration.getResident().getIdentityNumber())
-                .orElseThrow(() -> new BadRequestException(ErrorCode.RESIDENT_NOT_FOUND));
-        if (check(form_registration, resident)){
-            form_registration.setStatus(Status.VERIFIED);
-        }
-        else {
-            form_registration.setStatus(Status.REJECTED);
-        }
-        registrationRepository.save(form_registration);
-        return modelMapper.map(form_registration, RegistrationResponse.class);
+    RegistrationEntity formRegistration = registrationRepository.findById(id)
+            .orElseThrow(() -> new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND));
+    ResidentEntity resident = residentRepository.findById(formRegistration.getResident().getIdentityNumber())
+            .orElseThrow(() -> new BadRequestException(ErrorCode.RESIDENT_NOT_FOUND));
+    if (check(formRegistration, resident)){
+      formRegistration.setStatus(Status.VERIFIED);
     }
-
-    @Override
-    public Page<RegistrationResponse> getRegistrations(Pageable pageable) {
-        return registrationRepository.findAll(pageable)
-                .map(registration -> modelMapper.map(registration, RegistrationResponse.class));
+    else {
+      formRegistration.setStatus(Status.REJECTED);
     }
+    registrationRepository.save(formRegistration);
+    return modelMapper.map(formRegistration, RegistrationResponse.class);
+  }
 
-    public boolean check(RegistrationEntity form_registration, ResidentEntity resident) {
-        return Objects.equals(form_registration.getFullName(), resident.getFullName())
-                && Objects.equals(form_registration.getGender(), resident.getGender())
-                && Objects.equals(form_registration.getAddress(), resident.getAddress())
-                && Objects.equals(form_registration.getPhone(), resident.getPhone())
-                && Objects.equals(form_registration.getEmail(), resident.getEmail());
-    }
+  @Override
+  public Page<RegistrationResponse> getRegistrations(Pageable pageable) {
+    return registrationRepository.findAll(pageable)
+            .map(registration -> modelMapper.map(registration, RegistrationResponse.class));
+  }
+
+  public boolean check(RegistrationEntity formRegistration, ResidentEntity resident) {
+    return Objects.equals(formRegistration.getFullName(), resident.getFullName())
+            && Objects.equals(formRegistration.getGender(), resident.getGender())
+            && Objects.equals(formRegistration.getAddress(), resident.getAddress())
+            && Objects.equals(formRegistration.getPhone(), resident.getPhone())
+            && Objects.equals(formRegistration.getEmail(), resident.getEmail());
+  }
 }
