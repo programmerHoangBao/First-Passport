@@ -3,14 +3,19 @@ package com.group5.firstpassport.service.impl;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.request.ApprovalRequest;
 import com.group5.firstpassport.dto.response.ApprovalResponse;
+import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
+import com.group5.firstpassport.enums.ResultType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
 import com.group5.firstpassport.repository.RegistrationRepository;
@@ -49,5 +54,21 @@ public class ApprovalServiceImpl implements IApprovalService {
     approvalResponse.setFormId(approvalSaved.getRegistration().getId());
     approvalResponse.setApproverBy(approvalSaved.getApproverBy().getId());
     return approvalResponse;
+  }
+
+  @Override
+  public Page<ViewAllApprovalResponse> viewAllApproval(String resultStr, int pageNumber, int pageSize) {
+    ResultType resultType = ResultType.valueOf(resultStr);
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<ApprovalEntity> approvals = approvalRepository.findAllByResult(resultType, pageable);
+    if (approvals.isEmpty()) {
+      throw new BadRequestException(ErrorCode.NO_DATA);
+    }
+    return approvals.map(approval -> {
+      ViewAllApprovalResponse response = modelMapper.map(approval, ViewAllApprovalResponse.class);
+      response.setFormId(approval.getRegistration().getId());
+      response.setApproverBy(approval.getApproverBy().getFullName());
+      return response;
+    });
   }
 }

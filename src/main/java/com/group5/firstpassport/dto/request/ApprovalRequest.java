@@ -17,8 +17,6 @@ public class ApprovalRequest {
   private Long formId;
   private ResultType result = ResultType.APPROVED;
   private LocalDateTime approvedAt = LocalDateTime.now();
-  @NotBlank(message = "Address is required")
-  private String address;
   @NotBlank(message = "Approver ID is required")
   private Long approverBy;
 }

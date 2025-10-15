@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApprovalResponse {
+public class ViewAllApprovalResponse {
   private Long formId;
   private ResultType result;
   private LocalDateTime approvedAt;
-  private Long approverBy;
+  private String approverBy;
 }
