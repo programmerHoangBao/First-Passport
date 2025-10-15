@@ -25,6 +25,7 @@ public enum ErrorCode {
   RESIDENT_NOT_FOUND(1110, "Resident not found", HttpStatus.NOT_FOUND),
   NO_DATA(1111, "No data", HttpStatus.NOT_FOUND),
   FORM_REGISTRATION_NOT_FOUND(1111, "Form registration not found", HttpStatus.NOT_FOUND),
+  RESIDENT_NO_EXIST(1112, "Resident not found", HttpStatus.NOT_FOUND),
   OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int responseCode;
