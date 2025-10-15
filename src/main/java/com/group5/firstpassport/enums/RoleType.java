@@ -1,5 +1,5 @@
 package com.group5.firstpassport.enums;
 
-public enum Role {
+public enum RoleType {
   XT, XD, LT, GS
 }

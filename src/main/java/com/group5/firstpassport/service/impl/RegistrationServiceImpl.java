@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 import com.group5.firstpassport.dto.request.RegistrationRequest;
 import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
+import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.ResidentEntity;
 import com.group5.firstpassport.enums.ErrorCode;
+import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.RegistrationRepository;
 import com.group5.firstpassport.repository.ResidentRepository;
@@ -47,9 +49,10 @@ public class RegistrationServiceImpl implements IRegistrationService {
   }
 
   @Override
-  public Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber) {
+  public Page<ViewAllRegistrationResponse> findAllByStatus(String statusStr, int pageSize, int pageNumber) {
+    StatusType statusEnum = StatusType.valueOf(statusStr);
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
-    Page<RegistrationEntity> registrationEntities = registrationRepository.findAll(pageable);
+    Page<RegistrationEntity> registrationEntities = registrationRepository.findAllByStatus(statusEnum, pageable);
 
     if (registrationEntities.getTotalElements() == 0) {
         throw new BadRequestException(ErrorCode.NO_DATA);
@@ -67,5 +70,14 @@ public class RegistrationServiceImpl implements IRegistrationService {
             .status(registration.getStatus())
             .build()
     );
+  }
+
+  @Override
+  public ViewDetailedRegistrationResponse findDetailed(Long id) {
+    Optional<RegistrationEntity> existsRegistration = registrationRepository.findById(id);
+    if (!existsRegistration.isPresent()) {
+      throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
+    }
+    return modelMapper.map(existsRegistration.get(), ViewDetailedRegistrationResponse.class);
   }
 }

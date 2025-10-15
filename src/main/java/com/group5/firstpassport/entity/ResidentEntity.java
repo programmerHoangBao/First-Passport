@@ -1,6 +1,6 @@
 package com.group5.firstpassport.entity;
 
-import com.group5.firstpassport.enums.Gender;
+import com.group5.firstpassport.enums.GenderType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ public class ResidentEntity {
   private String fullName;
   private LocalDate dateOfBirth;
   @Enumerated(EnumType.STRING)
-  private Gender gender;
+  private GenderType gender;
   private String address;
   @Column(name = "PHONE", length = 10, nullable = false)
   private String phone;

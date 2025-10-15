@@ -5,8 +5,10 @@ import org.springframework.data.domain.Page;
 import com.group5.firstpassport.dto.request.RegistrationRequest;
 import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
+import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 
 public interface IRegistrationService {
   RegistrationResponse registration(RegistrationRequest registrationRequest);
-  Page<ViewAllRegistrationResponse> findAll(int pageSize, int pageNumber);
+  Page<ViewAllRegistrationResponse> findAllByStatus(String statusStr, int pageSize, int pageNumber);
+  ViewDetailedRegistrationResponse findDetailed(Long id);
 }

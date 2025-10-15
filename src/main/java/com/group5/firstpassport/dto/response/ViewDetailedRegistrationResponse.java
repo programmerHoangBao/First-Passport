@@ -14,14 +14,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ViewAllRegistrationResponse {
-  private Long id;
-  private String identityNumber;
-  private String fullName;
-  private String address;
-  private GenderType gender;
-  private String phone;
-  private String email;
-  private LocalDateTime createdAt;
-  private StatusType status;
+public class ViewDetailedRegistrationResponse {
+    private Long id;
+    private String fullName;
+    private String address;
+    private GenderType gender;
+    private String phone;
+    private String email;
+    private LocalDateTime createdAt;
+    private StatusType status;
 }

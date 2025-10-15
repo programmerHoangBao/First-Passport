@@ -1,7 +1,7 @@
 package com.group5.firstpassport.entity;
 
-import com.group5.firstpassport.enums.Gender;
-import com.group5.firstpassport.enums.Status;
+import com.group5.firstpassport.enums.GenderType;
+import com.group5.firstpassport.enums.StatusType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,13 +26,13 @@ public class RegistrationEntity {
   private String fullName;
   private String address;
   @Enumerated(EnumType.STRING)
-  private Gender gender;
+  private GenderType gender;
   @Column(name = "PHONE", length = 10, nullable = false)
   private String phone;
   private String email;
   private LocalDateTime createdAt;
   @Enumerated(EnumType.STRING)
-  private Status status;
+  private StatusType status;
 
   @OneToOne(mappedBy = "registration", cascade = CascadeType.ALL)
   private ApprovalEntity approvalData;

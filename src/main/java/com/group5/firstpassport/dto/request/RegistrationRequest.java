@@ -1,7 +1,7 @@
 package com.group5.firstpassport.dto.request;
 
-import com.group5.firstpassport.enums.Gender;
-import com.group5.firstpassport.enums.Status;
+import com.group5.firstpassport.enums.GenderType;
+import com.group5.firstpassport.enums.StatusType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -21,7 +21,7 @@ public class RegistrationRequest {
   private String fullName;
   @NotBlank(message = "Address should not be blank")
   private String address;
-  private Gender gender = Gender.MALE;
+  private GenderType gender = GenderType.MALE;
   @Pattern(regexp = "^\\d{10}$", message = "Phone number must contain 10 digits")
   @NotBlank(message = "Phone number should not be blank")
   private String phone;
@@ -29,7 +29,7 @@ public class RegistrationRequest {
   @NotBlank(message = "Email address should not be blank")
   private String email;
   private LocalDateTime createdAt = LocalDateTime.now();
-  private Status status = Status.PENDING;
+  private StatusType status = StatusType.PENDING;
 }
 
 

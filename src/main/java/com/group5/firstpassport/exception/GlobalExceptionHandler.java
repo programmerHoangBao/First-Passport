@@ -3,7 +3,11 @@ package com.group5.firstpassport.exception;
 import com.group5.firstpassport.dto.response.ErrorResponse;
 import com.group5.firstpassport.enums.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -18,8 +22,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestControllerAdvice
 @Slf4j
@@ -110,15 +116,29 @@ public class GlobalExceptionHandler {
             .body(errorResponse);
   }
 
-  // Handle validation errors and return field-specific messages
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
     Map<String, String> errors = new LinkedHashMap<>();
-    ex.getBindingResult().getFieldErrors().forEach(error ->
-            errors.put(error.getField(), error.getDefaultMessage())
-    );
+    ex.getBindingResult().getFieldErrors()
+            .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+    ex.getBindingResult().getGlobalErrors()
+            .forEach(error -> errors.put(error.getObjectName(), error.getDefaultMessage()));
     return ResponseEntity.badRequest().body(errors);
   }
+
+      @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
+        StringBuilder message = new StringBuilder();
+
+        for (ConstraintViolation<?> violation : violations) {
+            message.append(violation.getMessage()).append("; ");
+        }
+
+        errorResponse.put("error", message.toString().trim());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 
   // Handles exception when a requested resource is not found (e.g., search result missing)
   @ExceptionHandler(NoResourceFoundException.class)

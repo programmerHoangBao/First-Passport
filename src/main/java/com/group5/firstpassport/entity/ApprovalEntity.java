@@ -1,6 +1,6 @@
 package com.group5.firstpassport.entity;
 
-import com.group5.firstpassport.enums.Result;
+import com.group5.firstpassport.enums.ResultType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class ApprovalEntity {
   private RegistrationEntity registration;
 
   @Enumerated(EnumType.STRING)
-  private Result result;
+  private ResultType result;
 
   private LocalDateTime approvedAt;
   private String address;

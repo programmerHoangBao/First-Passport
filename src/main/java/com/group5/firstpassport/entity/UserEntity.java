@@ -1,6 +1,6 @@
 package com.group5.firstpassport.entity;
 
-import com.group5.firstpassport.enums.Role;
+import com.group5.firstpassport.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class UserEntity {
   private String password;
 
   @Enumerated(EnumType.STRING)
-  private Role role;
+  private RoleType role;
 
   private String fullName;
 }

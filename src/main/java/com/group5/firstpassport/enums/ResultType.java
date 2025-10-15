@@ -1,6 +1,6 @@
 package com.group5.firstpassport.enums;
 
-public enum Result {
+public enum ResultType {
   APPROVED,
   REJECTED,
 }
