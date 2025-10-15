@@ -20,7 +20,6 @@ import com.group5.firstpassport.entity.ResidentEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
 import com.group5.firstpassport.enums.MessageCode;
-import com.group5.firstpassport.enums.ResultType;
 import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
@@ -90,8 +89,8 @@ public class RegistrationServiceImpl implements IRegistrationService {
   }
 
   @Override
-  public MessageResponse sendFromToXD(Long fromId, Long userId) {
-    Optional<RegistrationEntity> existsFrom = registrationRepository.findById(fromId);
+  public MessageResponse sendFromToXD(Long formId, Long userId) {
+    Optional<RegistrationEntity> existsFrom = registrationRepository.findById(formId);
     Optional<UserEntity> existsUser = userRepository.findById(userId);
     if (!existsFrom.isPresent()) {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);

@@ -9,4 +9,5 @@ import com.group5.firstpassport.enums.ResultType;
 
 public interface ApprovalRepository extends JpaRepository<ApprovalEntity, Long> {
   Page<ApprovalEntity> findAllByResult(ResultType result, Pageable pageable);
+  Page<ApprovalEntity> findByResultIsNull(Pageable pageable);
 }

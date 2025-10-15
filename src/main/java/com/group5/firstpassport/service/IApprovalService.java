@@ -8,5 +8,6 @@ import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
 
 public interface IApprovalService {
   ApprovalResponse approval(ApprovalRequest approvalRequest);
-  Page<ViewAllApprovalResponse> viewAllApproval(String resultStr, int pageNumber, int pageSize);
+  Page<ViewAllApprovalResponse> viewAllApprovalByResult(String resultStr, int pageNumber, int pageSize);
+  Page<ViewAllApprovalResponse> viewAllApprovalByResultIsNull(int pageNumber, int pageSize);
 }

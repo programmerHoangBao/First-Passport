@@ -54,12 +54,12 @@ public class RegistrationController {
     return ResponseEntity.ok(registrationService.findDetailed(id));
   }
 
-  @PostMapping("send-from")
+  @PostMapping("send-form")
   public ResponseEntity<MessageResponse> sendFromToXD(
-    @RequestParam Long fromId,
+    @RequestParam Long formId,
     @RequestParam Long userId
   ) {
-    MessageResponse message = registrationService.sendFromToXD(fromId, userId);
+    MessageResponse message = registrationService.sendFromToXD(formId, userId);
     return ResponseEntity.status(message.getMessageCode().getHttpStatus())
                     .body(message);
   }

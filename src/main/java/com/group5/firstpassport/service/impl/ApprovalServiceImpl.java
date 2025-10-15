@@ -57,10 +57,25 @@ public class ApprovalServiceImpl implements IApprovalService {
   }
 
   @Override
-  public Page<ViewAllApprovalResponse> viewAllApproval(String resultStr, int pageNumber, int pageSize) {
+  public Page<ViewAllApprovalResponse> viewAllApprovalByResult(String resultStr, int pageNumber, int pageSize) {
     ResultType resultType = ResultType.valueOf(resultStr);
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
     Page<ApprovalEntity> approvals = approvalRepository.findAllByResult(resultType, pageable);
+    if (approvals.isEmpty()) {
+      throw new BadRequestException(ErrorCode.NO_DATA);
+    }
+    return approvals.map(approval -> {
+      ViewAllApprovalResponse response = modelMapper.map(approval, ViewAllApprovalResponse.class);
+      response.setFormId(approval.getRegistration().getId());
+      response.setApproverBy(approval.getApproverBy().getFullName());
+      return response;
+    });
+  }
+
+  @Override
+  public Page<ViewAllApprovalResponse> viewAllApprovalByResultIsNull(int pageNumber, int pageSize) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<ApprovalEntity> approvals = approvalRepository.findByResultIsNull(pageable);
     if (approvals.isEmpty()) {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
