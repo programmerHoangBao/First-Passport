@@ -4,7 +4,7 @@ import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.ResidentEntity;
 import com.group5.firstpassport.enums.ErrorCode;
-import com.group5.firstpassport.enums.Status;
+import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.RegistrationRepository;
 import com.group5.firstpassport.repository.ResidentRepository;
@@ -37,10 +37,10 @@ public class VerifyRegistrationServiceImpl implements IVerifyRegistrationService
     ResidentEntity resident = residentRepository.findById(formRegistration.getResident().getIdentityNumber())
             .orElseThrow(() -> new BadRequestException(ErrorCode.RESIDENT_NOT_FOUND));
     if (check(formRegistration, resident)){
-      formRegistration.setStatus(Status.VERIFIED);
+      formRegistration.setStatus(StatusType.VERIFIED);
     }
     else {
-      formRegistration.setStatus(Status.REJECTED);
+      formRegistration.setStatus(StatusType.REJECTED);
     }
     registrationRepository.save(formRegistration);
     return modelMapper.map(formRegistration, RegistrationResponse.class);

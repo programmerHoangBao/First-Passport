@@ -1,5 +1,5 @@
 package com.group5.firstpassport.enums;
 
-public enum Status {
+public enum StatusType {
   PENDING, VERIFIED, REJECTED
 }

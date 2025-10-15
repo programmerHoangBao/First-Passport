@@ -1,6 +1,6 @@
 package com.group5.firstpassport.enums;
 
-public enum Gender {
+public enum GenderType {
   MALE, FEMALE
 }
 
