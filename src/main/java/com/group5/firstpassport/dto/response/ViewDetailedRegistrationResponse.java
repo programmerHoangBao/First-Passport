@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ViewDetailedRegistrationResponse {
     private Long id;
     private String fullName;
