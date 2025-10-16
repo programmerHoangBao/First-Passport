@@ -1,10 +1,9 @@
 package com.group5.firstpassport.controller;
 
+import com.group5.firstpassport.dto.response.ViewAllRequestStoreResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.group5.firstpassport.dto.response.CreatePassportResponse;
 import com.group5.firstpassport.service.impl.PassportServiceImpl;
@@ -26,5 +25,12 @@ public class PassportController {
     @RequestParam Long usserId
   ) {
     return ResponseEntity.ok(passportService.createPassport(approvalId, usserId));
+  }
+
+  @GetMapping("/all-request-store")
+  public ResponseEntity<Page<ViewAllRequestStoreResponse>> viewAllRequestStore(
+          @RequestParam int pageNumber,
+          @RequestParam int pageSize) {
+    return ResponseEntity.ok(passportService.viewAllRequestStore(pageNumber, pageSize));
   }
 }

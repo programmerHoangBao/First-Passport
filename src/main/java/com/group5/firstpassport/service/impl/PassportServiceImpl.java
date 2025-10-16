@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.response.CreatePassportResponse;
+import com.group5.firstpassport.dto.response.ViewAllRequestStoreResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.PassportEntity;
 import com.group5.firstpassport.entity.UserEntity;
@@ -58,5 +62,22 @@ public class PassportServiceImpl implements IPassportService{
       throw new BadRequestException(ErrorCode.SAVE_PASSPORT_FAILED);
     }
     return modelMapper.map(passportSave, CreatePassportResponse.class);
+  }
+
+  @Override
+  public Page<ViewAllRequestStoreResponse> viewAllRequestStore(int pageNumber, int pageSize) {
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<ApprovalEntity> approvals = approvalRepository.findAllByResult(ResultType.APPROVED, pageable);
+    if (approvals.isEmpty()) {
+      throw new BadRequestException(ErrorCode.NO_DATA);
+    }
+    return approvals.map(approval -> {
+      ViewAllRequestStoreResponse response = ViewAllRequestStoreResponse.builder()
+              .approvalId(approval.getId())
+              .createdBy(approval.getApproverBy().getUsername())
+              .createdAt(approval.getApprovedAt())
+              .build();
+      return response;
+    });
   }
 }
