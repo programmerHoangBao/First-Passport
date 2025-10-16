@@ -47,6 +47,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/xt/send-from").permitAll()
                     .requestMatchers("/api/xd/all-send-from-to-xd").permitAll()
                     .requestMatchers("/api/xd/view-detail-approval").permitAll()
+                    .requestMatchers("/api/lt/create-passport").permitAll()
 
 
                     // Role-based endpoints

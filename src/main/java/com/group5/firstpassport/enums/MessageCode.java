@@ -14,7 +14,12 @@ public enum MessageCode {
   SEND_FROM_REGISTRATION_SUCCESS(
       1000, 
       "Verification successfulWaiting for passport application information to be reviewed.", 
-      HttpStatus.OK);
+      HttpStatus.OK),
+  SEND_REQUEST_STORE_SUCCESS(
+      1001,
+      "Passport data storage request submitted successfully.",
+      HttpStatus.OK
+  );
 
   private final int responseCode;
   private final String message;
