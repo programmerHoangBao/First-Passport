@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,6 +61,13 @@ public class RegistrationController {
     @RequestParam Long userId
   ) {
     MessageResponse message = registrationService.sendFromToXD(formId, userId);
+    return ResponseEntity.status(message.getMessageCode().getHttpStatus())
+                    .body(message);
+  }
+
+  @PutMapping("/xt/reject-form")
+  public ResponseEntity<MessageResponse> rejectForm(@RequestParam Long formId) {
+    MessageResponse message = registrationService.rejectForm(formId);
     return ResponseEntity.status(message.getMessageCode().getHttpStatus())
                     .body(message);
   }

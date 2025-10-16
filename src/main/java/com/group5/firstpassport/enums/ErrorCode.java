@@ -30,6 +30,7 @@ public enum ErrorCode {
   APPROVAL_NO_EXISTS(1114, "Approval does not exist.", HttpStatus.NOT_FOUND),
   UNVERIFIED_INFORMATION(1115, "Information is unverified or does not exist.", HttpStatus.NOT_FOUND),
   SAVE_PASSPORT_FAILED(1116, "Failed to save passport information!", HttpStatus.BAD_REQUEST),
+  REJECT_FORM_FAILD(1117, "Failed to reject the passport application form.", HttpStatus.BAD_REQUEST),
   OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int responseCode;
