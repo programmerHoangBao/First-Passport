@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.group5.firstpassport.dto.request.ApprovalRequest;
 import com.group5.firstpassport.dto.response.ApprovalResponse;
 import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
+import com.group5.firstpassport.dto.response.ViewDetailedApprovalResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.UserEntity;
@@ -67,7 +68,7 @@ public class ApprovalServiceImpl implements IApprovalService {
     return approvals.map(approval -> {
       ViewAllApprovalResponse response = modelMapper.map(approval, ViewAllApprovalResponse.class);
       response.setFormId(approval.getRegistration().getId());
-      response.setApproverBy(approval.getApproverBy().getFullName());
+      response.setApproverBy(approval.getApproverBy().getUsername());
       return response;
     });
   }
@@ -82,8 +83,32 @@ public class ApprovalServiceImpl implements IApprovalService {
     return approvals.map(approval -> {
       ViewAllApprovalResponse response = modelMapper.map(approval, ViewAllApprovalResponse.class);
       response.setFormId(approval.getRegistration().getId());
-      response.setApproverBy(approval.getApproverBy().getFullName());
+      response.setApproverBy(approval.getApproverBy().getUsername());
       return response;
     });
+  }
+
+  @Override
+  public ViewDetailedApprovalResponse viewDetailedApproval(Long id) {
+    Optional<ApprovalEntity> existsApproval = approvalRepository.findById(id);
+    if (!existsApproval.isPresent()) {
+      throw new BadRequestException(ErrorCode.APPROVAL_NO_EXISTS);
+    }
+    return ViewDetailedApprovalResponse.builder()
+              .id(existsApproval.get().getId())
+              .formId(existsApproval.get().getRegistration().getId())
+              .identityNumber(existsApproval.get().getRegistration().getResident().getIdentityNumber())
+              .fullName(existsApproval.get().getRegistration().getFullName())
+              .address(existsApproval.get().getRegistration().getAddress())
+              .gender(existsApproval.get().getRegistration().getGender())
+              .phone(existsApproval.get().getRegistration().getPhone())
+              .email(existsApproval.get().getRegistration().getEmail())
+              .createdFormAt(existsApproval.get().getRegistration().getCreatedAt())
+              .xtBy(existsApproval.get().getApproverBy().getUsername())
+              .result(existsApproval.get().getResult())
+              .approvedAt(existsApproval.get().getApprovedAt())
+              .createdBY(existsApproval.get().getCreatedBy().getUsername())
+              .createdAt(existsApproval.get().getCreatedAt())
+              .build();
   }
 }

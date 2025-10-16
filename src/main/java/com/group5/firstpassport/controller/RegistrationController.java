@@ -26,7 +26,7 @@ import lombok.experimental.FieldDefaults;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/first-passport")
+@RequestMapping("/api")
 @Validated
 public class RegistrationController {
   RegistrationServiceImpl registrationService;
@@ -36,7 +36,7 @@ public class RegistrationController {
     return ResponseEntity.ok(registrationService.registration(registrationRequest));
   }
 
-  @GetMapping("/view-all-registration")
+  @GetMapping("/xt/view-all-registration")
   public ResponseEntity<Page<ViewAllRegistrationResponse>> findAll(
     @RequestParam
     @Pattern(
@@ -49,12 +49,12 @@ public class RegistrationController {
     return ResponseEntity.ok(registrationService.findAllByStatus(status, pageSize, pageNumber));
   }
 
-  @GetMapping("/view-detail-registration")
+  @GetMapping("/xt/view-detail-registration")
   public ResponseEntity<ViewDetailedRegistrationResponse> findDetailed(@RequestParam Long id) {
     return ResponseEntity.ok(registrationService.findDetailed(id));
   }
 
-  @PostMapping("send-form")
+  @PostMapping("/xt/send-form")
   public ResponseEntity<MessageResponse> sendFromToXD(
     @RequestParam Long formId,
     @RequestParam Long userId

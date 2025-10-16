@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ViewDetailedRegistrationResponse {
     private Long id;
+    private String identityNumber;
     private String fullName;
     private String address;
     private GenderType gender;
