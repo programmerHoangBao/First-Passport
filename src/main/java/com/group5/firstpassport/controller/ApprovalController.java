@@ -35,8 +35,8 @@ public class ApprovalController {
     return ResponseEntity.ok(approvalService.approval(approvalRequest));
   }
 
-  @GetMapping("/view-all-approval")
-  public ResponseEntity<Page<ViewAllApprovalResponse>> viewAllApproval(
+  @GetMapping("/all-approval-by-result")
+  public ResponseEntity<Page<ViewAllApprovalResponse>> viewAllApprovalByResult(
     @RequestParam
     @Pattern(
       regexp = "^(?i)(APPROVED|REJECTED)$", 
@@ -46,6 +46,14 @@ public class ApprovalController {
     @RequestParam(defaultValue = "0") int pageNumber,
     @RequestParam(defaultValue = "10") int pageSize
   ) {
-    return ResponseEntity.ok(approvalService.viewAllApproval(result, pageNumber, pageSize));
+    return ResponseEntity.ok(approvalService.viewAllApprovalByResult(result, pageNumber, pageSize));
+  }
+
+  @GetMapping("/all-send-from-to-xd")
+  public ResponseEntity<Page<ViewAllApprovalResponse>> viewAllApprovalByResultIsNull(
+     @RequestParam(defaultValue = "0") int pageNumber,
+    @RequestParam(defaultValue = "10") int pageSize
+  ) {
+    return ResponseEntity.ok(approvalService.viewAllApprovalByResultIsNull(pageNumber, pageSize));
   }
 }

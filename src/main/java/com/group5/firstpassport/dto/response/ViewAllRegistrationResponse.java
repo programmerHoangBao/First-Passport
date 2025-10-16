@@ -2,6 +2,7 @@ package com.group5.firstpassport.dto.response;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.group5.firstpassport.enums.GenderType;
 import com.group5.firstpassport.enums.StatusType;
 
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ViewAllRegistrationResponse {
   private Long id;
   private String identityNumber;
