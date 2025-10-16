@@ -1,5 +1,6 @@
 package com.group5.firstpassport.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
@@ -9,16 +10,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.request.RegistrationRequest;
+import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
+import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.ResidentEntity;
+import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
+import com.group5.firstpassport.enums.MessageCode;
+import com.group5.firstpassport.enums.ResultType;
 import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
+import com.group5.firstpassport.repository.ApprovalRepository;
 import com.group5.firstpassport.repository.RegistrationRepository;
 import com.group5.firstpassport.repository.ResidentRepository;
+import com.group5.firstpassport.repository.UserRepository;
 import com.group5.firstpassport.service.IRegistrationService;
 
 import lombok.AccessLevel;
@@ -31,6 +39,8 @@ import lombok.experimental.FieldDefaults;
 public class RegistrationServiceImpl implements IRegistrationService {
   RegistrationRepository registrationRepository;
   ResidentRepository residentRepository;
+  ApprovalRepository approvalRepository;
+  UserRepository userRepository;
   ModelMapper modelMapper;
   
   @Override
@@ -77,5 +87,29 @@ public class RegistrationServiceImpl implements IRegistrationService {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
     }
     return modelMapper.map(existsRegistration.get(), ViewDetailedRegistrationResponse.class);
+  }
+
+  @Override
+  public MessageResponse sendFromToXD(Long fromId, Long userId) {
+    Optional<RegistrationEntity> existsFrom = registrationRepository.findById(fromId);
+    Optional<UserEntity> existsUser = userRepository.findById(userId);
+    if (!existsFrom.isPresent()) {
+      throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
+    }
+    if (!existsUser.isPresent()) {
+      throw new BadRequestException(ErrorCode.USER_NO_EXIST);
+    }
+    ApprovalEntity approval = ApprovalEntity.builder()
+            .registration(existsFrom.get())
+            .approvedAt(LocalDateTime.now())
+            .approverBy(existsUser.get())
+            .build();
+    if (approvalRepository.save(approval).getId() == null) {
+      throw new BadRequestException(ErrorCode.SEND_FROM_REGISTRATION_FALIED);
+    }
+    return MessageResponse.builder()
+                  .messageCode(MessageCode.SEND_FROM_REGISTRATION_SUCCESS)
+                  .timestamp(LocalDateTime.now())
+                  .build();
   }
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.group5.firstpassport.dto.request.RegistrationRequest;
+import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.dto.response.RegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
@@ -51,5 +52,15 @@ public class RegistrationController {
   @GetMapping("/view-detail-registration")
   public ResponseEntity<ViewDetailedRegistrationResponse> findDetailed(@RequestParam Long id) {
     return ResponseEntity.ok(registrationService.findDetailed(id));
+  }
+
+  @PostMapping("send-from")
+  public ResponseEntity<MessageResponse> sendFromToXD(
+    @RequestParam Long fromId,
+    @RequestParam Long userId
+  ) {
+    MessageResponse message = registrationService.sendFromToXD(fromId, userId);
+    return ResponseEntity.status(message.getMessageCode().getHttpStatus())
+                    .body(message);
   }
 }

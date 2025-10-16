@@ -6,7 +6,6 @@ import com.group5.firstpassport.enums.GenderType;
 import com.group5.firstpassport.enums.StatusType;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
