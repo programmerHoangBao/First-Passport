@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/first-passport")
+@RequestMapping("/api")
 @Validated
 public class ResidentController {
   ResidentServiceImpl residentService;
 
-  @GetMapping("/view-detail-resident")
+  @GetMapping("/xt/view-detail-resident")
   public ResponseEntity<ViewDetailedResidentResponse> viewDetailResident(
           @RequestParam
           @Pattern(regexp = "^\\d{12}$", message = "Identity Number must contain 12 digits")

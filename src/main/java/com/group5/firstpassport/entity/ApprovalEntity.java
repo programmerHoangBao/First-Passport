@@ -32,4 +32,12 @@ public class ApprovalEntity {
   @ManyToOne
   @JoinColumn(name = "APPROVER_USER_ID")
   private UserEntity approverBy;
+
+  @ManyToOne
+  @JoinColumn(nullable = false)
+  private UserEntity createdBy;
+
+  @Column(nullable = false)
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
 }

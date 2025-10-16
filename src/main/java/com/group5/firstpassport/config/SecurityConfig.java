@@ -37,14 +37,17 @@ public class SecurityConfig {
             // Configure endpoint authorization
             .authorizeHttpRequests(auth -> auth
                     // Public endpoints
-                    .requestMatchers("/first-passport/login").permitAll()
-                    .requestMatchers("/first-passport/register").permitAll()
-                    .requestMatchers("/first-passport/view-all-registration").permitAll()
-                    .requestMatchers("/first-passport/approval").permitAll()
-                    .requestMatchers("/first-passport/view-detail-registration").permitAll()
-                    .requestMatchers("/first-passport/view-detail-resident").permitAll()
-                    .requestMatchers("/first-passport/view-all-approval").permitAll()
-                    .requestMatchers("/first-passport/send-from").permitAll()
+                    .requestMatchers("/api/login").permitAll()
+                    .requestMatchers("/api/register").permitAll()
+                    .requestMatchers("/api/xt/view-all-registration").permitAll()
+                    .requestMatchers("/api/xd/approval").permitAll()
+                    .requestMatchers("/api/xt/view-detail-registration").permitAll()
+                    .requestMatchers("/api/xt/view-detail-resident").permitAll()
+                    .requestMatchers("/api/xd//all-approval-by-result").permitAll()
+                    .requestMatchers("/api/xt/send-from").permitAll()
+                    .requestMatchers("/api/xd/all-send-from-to-xd").permitAll()
+                    .requestMatchers("/api/xd/view-detail-approval").permitAll()
+
 
                     // Role-based endpoints
                     .requestMatchers("/api/xt/**").hasRole("XT")

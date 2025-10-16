@@ -85,7 +85,9 @@ public class RegistrationServiceImpl implements IRegistrationService {
     if (!existsRegistration.isPresent()) {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
     }
-    return modelMapper.map(existsRegistration.get(), ViewDetailedRegistrationResponse.class);
+    ViewDetailedRegistrationResponse response = modelMapper.map(existsRegistration.get(), ViewDetailedRegistrationResponse.class);
+    response.setIdentityNumber(existsRegistration.get().getResident().getIdentityNumber());
+    return response;
   }
 
   @Override
@@ -100,8 +102,8 @@ public class RegistrationServiceImpl implements IRegistrationService {
     }
     ApprovalEntity approval = ApprovalEntity.builder()
             .registration(existsFrom.get())
-            .approvedAt(LocalDateTime.now())
-            .approverBy(existsUser.get())
+            .createdBy(existsUser.get())
+            .createdAt(LocalDateTime.now())
             .build();
     if (approvalRepository.save(approval).getId() == null) {
       throw new BadRequestException(ErrorCode.SEND_FROM_REGISTRATION_FALIED);

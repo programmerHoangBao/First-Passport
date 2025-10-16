@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 public class ApprovalResponse {
   private Long formId;
   private ResultType result;
-  private LocalDateTime approvedAt;
+  private LocalDateTime approvedAt = LocalDateTime.now();
   private Long approverBy;
 }
