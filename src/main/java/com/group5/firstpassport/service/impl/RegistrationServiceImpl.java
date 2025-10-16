@@ -108,8 +108,28 @@ public class RegistrationServiceImpl implements IRegistrationService {
     if (approvalRepository.save(approval).getId() == null) {
       throw new BadRequestException(ErrorCode.SEND_FROM_REGISTRATION_FALIED);
     }
+    RegistrationEntity updateForm = existsFrom.get();
+    updateForm.setStatus(StatusType.VERIFIED);
+    registrationRepository.save(updateForm);
     return MessageResponse.builder()
                   .messageCode(MessageCode.SEND_FROM_REGISTRATION_SUCCESS)
+                  .timestamp(LocalDateTime.now())
+                  .build();
+  }
+
+  @Override
+  public MessageResponse rejectForm(Long formId) {
+    Optional<RegistrationEntity> existsFrom = registrationRepository.findById(formId);
+        if (!existsFrom.isPresent()) {
+      throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
+    }
+    RegistrationEntity updateForm = existsFrom.get();
+    updateForm.setStatus(StatusType.REJECTED);
+    if (registrationRepository.save(updateForm).getId() == null) {
+      throw new BadRequestException(ErrorCode.REJECT_FORM_FAILD);
+    }
+    return MessageResponse.builder()
+                  .messageCode(MessageCode.REJECT_FORM_REGISTRATION_SUCCESS)
                   .timestamp(LocalDateTime.now())
                   .build();
   }

@@ -13,4 +13,5 @@ public interface IRegistrationService {
   Page<ViewAllRegistrationResponse> findAllByStatus(String statusStr, int pageSize, int pageNumber);
   ViewDetailedRegistrationResponse findDetailed(Long id);
   MessageResponse sendFromToXD(Long formId, Long userId);
+  MessageResponse rejectForm(Long formId);
 }
