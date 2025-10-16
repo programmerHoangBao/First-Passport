@@ -50,6 +50,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/lt/create-passport").permitAll()
                     .requestMatchers("/api/xt/reject-form").permitAll()
                     .requestMatchers("/api/lt/all-request-store").permitAll()
+                    .requestMatchers("/api/lt/reject-passport").permitAll()
 
 
                     // Role-based endpoints
