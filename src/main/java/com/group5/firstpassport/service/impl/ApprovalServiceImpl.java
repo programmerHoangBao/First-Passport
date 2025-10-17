@@ -97,7 +97,7 @@ public class ApprovalServiceImpl implements IApprovalService {
     return ViewDetailedApprovalResponse.builder()
               .id(existsApproval.get().getId())
               .formId(existsApproval.get().getRegistration().getId())
-              .identityNumber(existsApproval.get().getRegistration().getIdentityNumber())
+              .identityNumber(existsApproval.get().getRegistration().getResident().getIdentityNumber())
               .fullName(existsApproval.get().getRegistration().getFullName())
               .address(existsApproval.get().getRegistration().getAddress())
               .gender(existsApproval.get().getRegistration().getGender())
