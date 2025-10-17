@@ -14,6 +14,8 @@ spring:
     username: ${ORACLE_DB_USERNAME}
     password: ${ORACLE_DB_PASSWORD}
     driver-class-name: oracle.jdbc.driver.OracleDriver
+#    hikari:
+#      connection-init-sql: "BEGIN DBMS_SESSION.set_context('passport_ctx','user_role','NONE'); END;"
   data:
     web:
       pageable:
@@ -33,5 +35,5 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-version: 1
-    # baseline-on-migrate: true
+    baseline-on-migrate: true
     schemas: ${ORACLE_DB_USERNAME}
