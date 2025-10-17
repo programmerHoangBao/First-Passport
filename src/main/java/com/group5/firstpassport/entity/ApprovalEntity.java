@@ -34,7 +34,7 @@ public class ApprovalEntity {
   private UserEntity approverBy;
 
   @ManyToOne
-  @JoinColumn(nullable = false)
+  @JoinColumn(name = "CREATED_BY_ID", nullable = false)
   private UserEntity createdBy;
 
   @Column(nullable = false)

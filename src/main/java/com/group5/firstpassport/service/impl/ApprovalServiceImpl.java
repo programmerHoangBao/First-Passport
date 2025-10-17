@@ -50,6 +50,15 @@ public class ApprovalServiceImpl implements IApprovalService {
     ApprovalEntity approvalInput = modelMapper.map(approvalRequest, ApprovalEntity.class);
     approvalInput.setRegistration(existsRegistration.get());
     approvalInput.setApproverBy(existsUser.get());
+    System.out.println(approvalInput.getApproverBy());
+
+    System.out.println(approvalInput.getApprovedAt());
+
+
+    System.out.println(approvalInput.getResult());
+
+
+    System.out.println(approvalInput.getCreatedBy().getId());
     ApprovalEntity approvalSaved = approvalRepository.save(approvalInput);
     ApprovalResponse approvalResponse = modelMapper.map(approvalSaved, ApprovalResponse.class);
     approvalResponse.setFormId(approvalSaved.getRegistration().getId());

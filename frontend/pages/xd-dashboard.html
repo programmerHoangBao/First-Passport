@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XD Dashboard</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>XD - Xét duyệt hồ sơ</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="register.html">Đăng ký</a>
+        <a href="xt-dashboard.html">XT</a>
+        <a href="lt-dashboard.html">LT</a>
+        <a href="gs-dashboard.html">GS</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="toolbar">
+          <h2>Danh sách hồ sơ chờ xét duyệt</h2>
+          <span id="count" class="badge">0</span>
+        </div>
+        <div id="msg"></div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã hồ sơ</th>
+                <th>Họ tên</th>
+                <th>CMND</th>
+                <th>Email</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiGet, apiPut } from '../js/api.js';
+      import { $, showMessage } from '../js/utils.js';
+      import { requireRole } from '../js/auth.js';
+
+      // chỉ cho phép vai trò XD
+      requireRole('XD');
+
+      const rows = $('#rows');
+      const msg = $('#msg');
+      const count = $('#count');
+
+      async function load(){
+        msg.innerHTML = '';
+        rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
+        try{
+          const data = await apiGet('/api/passport/pending-approval');
+          count.textContent = String(data?.length || 0);
+          rows.innerHTML = (data||[]).map(it=>`
+            <tr>
+              <td>${it.id ?? ''}</td>
+              <td>${it.fullName ?? ''}</td>
+              <td>${it.identityNumber ?? ''}</td>
+              <td>${it.email ?? ''}</td>
+              <td>
+                <button class="success" data-approve="${it.id}">Phê duyệt</button>
+                <button class="danger" data-reject="${it.id}">Từ chối</button>
+              </td>
+            </tr>
+          `).join('');
+        }catch(err){
+          rows.innerHTML = '';
+          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+        }
+      }
+
+      rows.addEventListener('click', async (e)=>{
+        const approveBtn = e.target.closest('button[data-approve]');
+        const rejectBtn = e.target.closest('button[data-reject]');
+        if(!approveBtn && !rejectBtn) return;
+        const id = (approveBtn||rejectBtn).getAttribute('data-approve') || (approveBtn||rejectBtn).getAttribute('data-reject');
+        (approveBtn||rejectBtn).disabled = true;
+        try{
+          if (approveBtn) await apiPut(`/api/passport/approve/${id}`);
+          if (rejectBtn) await apiPut(`/api/passport/reject/${id}`);
+          await load();
+        }catch(err){
+          showMessage(msg, 'error', err.message || 'Thao tác thất bại');
+        }finally{
+          (approveBtn||rejectBtn).disabled = false;
+        }
+      });
+
+      load();
+    </script>
+  </body>
+  </html>
+
+

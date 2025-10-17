@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký cấp hộ chiếu</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>Đăng ký cấp hộ chiếu</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="xt-dashboard.html">XT</a>
+        <a href="xd-dashboard.html">XD</a>
+        <a href="lt-dashboard.html">LT</a>
+        <a href="gs-dashboard.html">GS</a>
+      </nav>
+    </header>
+    <main class="container">
+      <section class="card">
+        <form id="register-form" class="grid grid-2">
+          <div>
+            <label>Họ và tên</label>
+            <input name="fullName" required />
+          </div>
+          <div>
+            <label>Địa chỉ thường trú</label>
+            <input name="address" required />
+          </div>
+          <div>
+            <label>Phái</label>
+            <select name="gender" required>
+              <option value="MALE">Nam</option>
+              <option value="FEMALE">Nữ</option>
+            </select>
+          </div>
+          <div>
+            <label>CMND</label>
+            <input name="identityNumber" required />
+          </div>
+          <div>
+            <label>Điện thoại</label>
+            <input name="phone" required />
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" name="email" required />
+          </div>
+          <div style="grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end">
+            <button type="reset" class="secondary">Làm mới</button>
+            <button type="submit" class="success">Gửi đăng ký</button>
+          </div>
+        </form>
+        <div id="msg" style="margin-top:12px"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiPost } from '../js/api.js';
+      import { $, showMessage } from '../js/utils.js';
+
+      const form = $('#register-form');
+      const msg = $('#msg');
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        msg.innerHTML = '';
+        const data = Object.fromEntries(new FormData(form).entries());
+        try{
+          await apiPost('/api/register', {
+            "fullName": data.fullName,
+            "address": data.address,
+            "gender": data.gender,
+            "identityNumber": data.identityNumber,
+            "phone": data.phone,
+            "email": data.email
+          });
+          showMessage(msg, 'success', 'Gửi đăng ký thành công!');
+          form.reset();
+        }catch(err){
+          showMessage(msg, 'error', err.message || 'Có lỗi xảy ra');
+        }
+      });
+    </script>
+  </body>
+  </html>
+
+

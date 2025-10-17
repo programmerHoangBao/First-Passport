@@ -105,6 +105,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
             .createdBy(existsUser.get())
             .createdAt(LocalDateTime.now())
             .build();
+    System.out.println(approval.getId());
     if (approvalRepository.save(approval).getId() == null) {
       throw new BadRequestException(ErrorCode.SEND_FROM_REGISTRATION_FALIED);
     }
