@@ -13,8 +13,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PassportEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +34,10 @@ public class PassportEntity {
   @ManyToOne
   @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
   private ResidentEntity resident;
+
+  @OneToOne
+  @JoinColumn(name = "APPROVAL_ID", nullable = false)
+  private ApprovalEntity approval;
 
   private String fullName;
   private String address;

@@ -16,16 +16,21 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.group5.firstpassport.filter.JwtAuthFilter;
+import com.group5.firstpassport.util.OracleContextFilter;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
 
-  private final JwtAuthFilter jwtAuthFilter;
-  private final UserDetailsService userDetailsService;
+  JwtAuthFilter jwtAuthFilter;
+  UserDetailsService userDetailsService;
+  OracleContextFilter oracleContextFilter;
 
 
   @Bean
@@ -40,14 +45,6 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers("/api/login").permitAll()
                     .requestMatchers("/api/register").permitAll()
-                    .requestMatchers("/api/xt/view-all-registration").permitAll()
-                    .requestMatchers("/api/xd/approval").permitAll()
-                    .requestMatchers("/api/xt/view-detail-registration").permitAll()
-                    .requestMatchers("/api/xt/view-detail-resident").permitAll()
-                    .requestMatchers("/api/xd//all-approval-by-result").permitAll()
-                    .requestMatchers("/api/xt/send-from").permitAll()
-                    .requestMatchers("/api/xd/all-send-from-to-xd").permitAll()
-                    .requestMatchers("/api/xd/view-detail-approval").permitAll()
 
 
                     // Role-based endpoints
@@ -69,7 +66,10 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
 
             // Add JWT filter before Spring Security's default filter
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+            //OracleContextFilter runs AFTER the role has been assigned.
+            .addFilterAfter(oracleContextFilter, JwtAuthFilter.class);
 
     return http.build();
   }

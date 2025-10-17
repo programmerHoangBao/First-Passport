@@ -14,18 +14,32 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LogEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "USER_ID")
-  private UserEntity user;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Enumerated(EnumType.STRING)
-  private RoleType role;
+    @ManyToOne
+    @JoinColumn(name = "ACTOR")
+    private UserEntity actor;
 
-  private String action;
-  private LocalDateTime timestamp;
-  private String details;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE", length = 20)
+    private RoleType role;
+
+    @Column(name = "ACTION", length = 255)
+    private String action;
+
+    @Column(name = "EVENT_TIME")
+    private LocalDateTime eventTime;
+
+    @Column(name = "POLICY_NAME", length = 100)
+    private String policyName;
+
+    @Column(name = "OBJECT_NAME", length = 50)
+    private String objectName;
+
+    @Lob
+    @Column(name = "SQL_TEXT")
+    private String sqlText;
 }

@@ -28,6 +28,10 @@ public enum ErrorCode {
   RESIDENT_NO_EXIST(1112, "Resident not found", HttpStatus.NOT_FOUND),
   SEND_FROM_REGISTRATION_FALIED(1113, "Send from registration failed.", HttpStatus.BAD_REQUEST),
   APPROVAL_NO_EXISTS(1114, "Approval does not exist.", HttpStatus.NOT_FOUND),
+  UNVERIFIED_INFORMATION(1115, "Information is unverified or does not exist.", HttpStatus.NOT_FOUND),
+  SAVE_PASSPORT_FAILED(1116, "Failed to save passport information!", HttpStatus.BAD_REQUEST),
+  REJECT_FORM_FAILED(1117, "Failed to reject the passport application form.", HttpStatus.BAD_REQUEST),
+  REJECT_REQUEST_STORE_FAILED(1118, "The request to deny passport creation failed.", HttpStatus.BAD_REQUEST),
   OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int responseCode;
