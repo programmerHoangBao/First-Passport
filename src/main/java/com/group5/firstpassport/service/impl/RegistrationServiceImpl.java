@@ -126,7 +126,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
     RegistrationEntity updateForm = existsFrom.get();
     updateForm.setStatus(StatusType.REJECTED);
     if (registrationRepository.save(updateForm).getId() == null) {
-      throw new BadRequestException(ErrorCode.REJECT_FORM_FAILD);
+      throw new BadRequestException(ErrorCode.REJECT_FORM_FAILED);
     }
     return MessageResponse.builder()
                   .messageCode(MessageCode.REJECT_FORM_REGISTRATION_SUCCESS)

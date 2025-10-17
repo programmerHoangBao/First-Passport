@@ -20,10 +20,10 @@ public enum MessageCode {
     "Passport application form rejected successfully.",
     HttpStatus.OK
   ),
-  SEND_REQUEST_STORE_SUCCESS(
-      1002,
-      "Passport data storage request submitted successfully.",
-      HttpStatus.OK
+  REJECT_REQUEST_STORE_SUCCESS(
+          1002,
+          "Reject the passport application request",
+          HttpStatus.OK
   );
 
   private final int responseCode;

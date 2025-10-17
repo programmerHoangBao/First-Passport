@@ -6,11 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.group5.firstpassport.dto.response.CreatePassportResponse;
+import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.service.impl.PassportServiceImpl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -32,5 +35,13 @@ public class PassportController {
           @RequestParam int pageNumber,
           @RequestParam int pageSize) {
     return ResponseEntity.ok(passportService.viewAllRequestStore(pageNumber, pageSize));
+  }
+
+  @PostMapping("/reject-passport")
+  public ResponseEntity<MessageResponse> rejectStorePassport(
+    @RequestParam Long approvalId,
+    @RequestParam Long userId
+  ) {
+    return ResponseEntity.ok(passportService.rejectPassport(approvalId, userId));
   }
 }

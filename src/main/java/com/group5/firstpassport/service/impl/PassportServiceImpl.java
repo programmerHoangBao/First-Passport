@@ -3,6 +3,9 @@ package com.group5.firstpassport.service.impl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.group5.firstpassport.dto.response.MessageResponse;
+import com.group5.firstpassport.enums.MessageCode;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +32,7 @@ import lombok.experimental.FieldDefaults;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class PassportServiceImpl implements IPassportService{
 
   PassportRepository passportRepository;
@@ -72,12 +76,34 @@ public class PassportServiceImpl implements IPassportService{
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
     return approvals.map(approval -> {
-      ViewAllRequestStoreResponse response = ViewAllRequestStoreResponse.builder()
+      return ViewAllRequestStoreResponse.builder()
               .approvalId(approval.getId())
               .createdBy(approval.getApproverBy().getUsername())
               .createdAt(approval.getApprovedAt())
               .build();
-      return response;
     });
+  }
+
+  @Override
+  public MessageResponse rejectPassport(Long approvalId, Long userId) {
+    Optional<ApprovalEntity> existsApproval = approvalRepository.findByIdAndResult(approvalId, ResultType.APPROVED);
+    Optional<UserEntity> existsUser = userRepository.findById(userId);
+    if (!existsApproval.isPresent()) {
+      throw new BadRequestException(ErrorCode.UNVERIFIED_INFORMATION);
+    }
+    if (!existsUser.isPresent()) {
+      throw new BadRequestException(ErrorCode.USER_NO_EXIST);
+    }
+    try {
+      approvalRepository.deleteById(approvalId);
+      return MessageResponse.builder()
+              .messageCode(MessageCode.REJECT_REQUEST_STORE_SUCCESS)
+              .timestamp(LocalDateTime.now())
+              .build();
+    }
+    catch (Exception e) {
+      log.error(e.getMessage());
+      throw new BadRequestException(ErrorCode.REJECT_REQUEST_STORE_FAILED);
+    }
   }
 }
