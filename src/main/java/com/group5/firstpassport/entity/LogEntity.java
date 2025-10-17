@@ -19,9 +19,8 @@ public class LogEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "ACTOR")
-    private UserEntity actor;
+    @Column(name = "ACTOR", length = 50)
+    private String actor;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", length = 20)

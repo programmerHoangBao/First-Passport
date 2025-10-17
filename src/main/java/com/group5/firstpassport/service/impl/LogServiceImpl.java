@@ -28,9 +28,7 @@ public class LogServiceImpl implements ILogService {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
     return logs.map(log -> {
-      ViewAllLogResponse response = modelMapper.map(log, ViewAllLogResponse.class);
-      response.setActor(log.getActor().getUsername());
-      return response;
+      return modelMapper.map(log, ViewAllLogResponse.class);
     });
   }
 }
