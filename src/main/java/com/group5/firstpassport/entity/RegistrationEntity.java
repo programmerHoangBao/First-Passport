@@ -19,7 +19,10 @@ public class RegistrationEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
+  @Column(name = "IDENTITY_NUMBER", insertable = false, updatable = false)
+  private String identityNumber;
+
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
   private ResidentEntity resident;
 
