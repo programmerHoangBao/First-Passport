@@ -17,15 +17,6 @@ BEGIN
   v_user_name := SYS_CONTEXT('passport_ctx', 'user_name');
   v_user_role := SYS_CONTEXT('passport_ctx', 'user_role');
 
-  -- Lấy ID user từ bảng USERS
-BEGIN
-SELECT ID INTO v_actor_id
-FROM USERS
-WHERE USERNAME = v_user_name;
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-      v_actor_id := NULL;
-END;
 BEGIN
     v_sql_id := SYS_CONTEXT('USERENV', 'CURRENT_SQL_ID');
 EXCEPTION
@@ -55,7 +46,7 @@ END IF;
 INSERT INTO LOGS (
     ACTOR, ROLE, ACTION, EVENT_TIME, POLICY_NAME, OBJECT_NAME, SQL_TEXT
 ) VALUES (
-             v_actor_id,
+             v_user_name,
              v_user_role,
              v_action,
              SYSTIMESTAMP,
