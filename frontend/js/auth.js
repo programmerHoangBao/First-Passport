@@ -7,8 +7,13 @@ export function isLoggedIn(){ return Boolean(getToken()); }
 export function saveAuth(resp){
 	// cố gắng bắt token theo các tên phổ biến
 	const token = resp?.accessToken || resp?.token || resp?.jwt || null;
-	const role = resp?.role || resp?.authorities?.[0]?.authority || resp?.authorities?.[0]?.name || null;
+	let role = resp?.role || resp?.authorities?.[0]?.authority || resp?.authorities?.[0]?.name || null;
 	if (token) localStorage.setItem('accessToken', token);
+	// Nếu response không có role, thử bóc từ JWT
+	if (!role && token) {
+		const decoded = decodeJwt(token);
+		role = decoded?.role || decoded?.roles?.[0] || decoded?.authorities?.[0] || decoded?.scope || null;
+	}
 	if (role) localStorage.setItem('role', normalizeRole(role));
 }
 
@@ -35,6 +40,20 @@ export function requireRole(roles){
 	if (!token || !role || !allowed.includes(normalizeRole(role))) {
 		window.location.href = '../pages/login.html';
 		throw new Error('Unauthorized');
+	}
+}
+
+function decodeJwt(jwt){
+	try{
+		const parts = String(jwt).split('.');
+		if (parts.length < 2) return null;
+		const payload = parts[1]
+			.replace(/-/g,'+')
+			.replace(/_/g,'/');
+		const json = atob(payload);
+		return JSON.parse(json);
+	}catch{
+		return null;
 	}
 }
 
