@@ -25,8 +25,7 @@ public class ResidentServiceImpl implements IResidentService {
   public ViewDetailedResidentResponse viewDetailedResident(String identityNumber) {
     Optional<ResidentEntity> existingResident = residentRepository.findByIdentityNumber(identityNumber);
     if (existingResident.isPresent()) {
-      ResidentEntity residentSave = residentRepository.save(existingResident.get());
-      return modelMapper.map(residentSave, ViewDetailedResidentResponse.class);
+      return modelMapper.map(existingResident.get(), ViewDetailedResidentResponse.class);
     }
     throw new BadRequestException(ErrorCode.RESIDENT_NO_EXIST);
   }

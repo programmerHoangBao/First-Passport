@@ -26,7 +26,4 @@ public class ResidentEntity {
   @Column(name = "PHONE", length = 10, nullable = false)
   private String phone;
   private String email;
-
-  @OneToMany(mappedBy = "resident", cascade = CascadeType.ALL)
-  private List<RegistrationEntity> registrations;
 }

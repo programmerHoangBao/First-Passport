@@ -4,17 +4,7 @@ import java.time.LocalDateTime;
 
 import com.group5.firstpassport.enums.GenderType;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +25,7 @@ public class PassportEntity {
   @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
   private ResidentEntity resident;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "APPROVAL_ID", nullable = false)
   private ApprovalEntity approval;
 
@@ -48,7 +38,7 @@ public class PassportEntity {
   private String phone;
   private String email;
   private LocalDateTime createdAt;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private UserEntity createdBy;
 }

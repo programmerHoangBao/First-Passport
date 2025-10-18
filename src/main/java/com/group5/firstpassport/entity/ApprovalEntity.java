@@ -20,7 +20,7 @@ public class ApprovalEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "FORM_ID", nullable = false)
   private RegistrationEntity registration;
 
@@ -29,11 +29,11 @@ public class ApprovalEntity {
 
   private LocalDateTime approvedAt;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "APPROVER_USER_ID")
   private UserEntity approverBy;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   private UserEntity createdBy;
 
