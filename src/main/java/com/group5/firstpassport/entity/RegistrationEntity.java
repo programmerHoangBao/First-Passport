@@ -19,7 +19,7 @@ public class RegistrationEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
   private ResidentEntity resident;
 
@@ -33,7 +33,4 @@ public class RegistrationEntity {
   private LocalDateTime createdAt;
   @Enumerated(EnumType.STRING)
   private StatusType status;
-
-  @OneToOne(mappedBy = "registration", cascade = CascadeType.ALL)
-  private ApprovalEntity approvalData;
 }
