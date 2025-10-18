@@ -37,8 +37,4 @@ public class LogEntity {
 
     @Column(name = "OBJECT_NAME", length = 50)
     private String objectName;
-
-    @Lob
-    @Column(name = "SQL_TEXT")
-    private String sqlText;
 }

@@ -1,7 +1,15 @@
 import { apiPost } from './api.js';
 
 export function getToken(){ return localStorage.getItem('accessToken'); }
-export function getRole(){ return localStorage.getItem('role'); }
+export function getRole(){
+	const cached = localStorage.getItem('role');
+	if (cached) return cached;
+	const token = getToken();
+	if (!token) return null;
+	const derived = deriveRoleFromToken(token);
+	if (derived) localStorage.setItem('role', derived);
+	return derived;
+}
 export function isLoggedIn(){ return Boolean(getToken()); }
 
 export function saveAuth(resp){
@@ -10,10 +18,7 @@ export function saveAuth(resp){
 	let role = resp?.role || resp?.authorities?.[0]?.authority || resp?.authorities?.[0]?.name || null;
 	if (token) localStorage.setItem('accessToken', token);
 	// Nếu response không có role, thử bóc từ JWT
-	if (!role && token) {
-		const decoded = decodeJwt(token);
-		role = decoded?.role || decoded?.roles?.[0] || decoded?.authorities?.[0] || decoded?.scope || null;
-	}
+	if (!role && token) role = deriveRoleFromToken(token);
 	if (role) localStorage.setItem('role', normalizeRole(role));
 }
 
@@ -47,14 +52,27 @@ function decodeJwt(jwt){
 	try{
 		const parts = String(jwt).split('.');
 		if (parts.length < 2) return null;
-		const payload = parts[1]
-			.replace(/-/g,'+')
-			.replace(/_/g,'/');
+		let payload = parts[1].replace(/-/g,'+').replace(/_/g,'/');
+		// padding
+		while (payload.length % 4) payload += '=';
 		const json = atob(payload);
 		return JSON.parse(json);
 	}catch{
 		return null;
 	}
+}
+
+function deriveRoleFromToken(token){
+	const decoded = decodeJwt(token) || {};
+	// hỗ trợ nhiều key phổ biến
+	let role = decoded.role
+		|| (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles)
+		|| (Array.isArray(decoded.authorities) ? decoded.authorities[0] : decoded.authorities)
+		|| decoded.scope
+		|| null;
+	// nếu là object {authority: 'ROLE_XT'}
+	if (role && typeof role === 'object' && role.authority) role = role.authority;
+	return role ? normalizeRole(role) : null;
 }
 
 
