@@ -8,52 +8,32 @@ CREATE OR REPLACE PROCEDURE log_fga_event_handler (
 ) AS
   v_user_name   VARCHAR2(100);
   v_user_role   VARCHAR2(20);
-  v_action      VARCHAR2(20);
+  v_action      VARCHAR2(50);
   v_sql_text    CLOB;
-  v_actor_id    NUMBER;
   v_sql_id      VARCHAR2(13);
 BEGIN
-  -- Lấy thông tin user
   v_user_name := SYS_CONTEXT('passport_ctx', 'user_name');
   v_user_role := SYS_CONTEXT('passport_ctx', 'user_role');
 
-BEGIN
-    v_sql_id := SYS_CONTEXT('USERENV', 'CURRENT_SQL_ID');
-EXCEPTION
-    WHEN OTHERS THEN
-      v_sql_id := NULL;
-END;
+  v_action := CASE
+                WHEN p_policy_name LIKE '%SELECT%' THEN 'SELECT'
+                WHEN p_policy_name LIKE '%INSERT%' THEN 'INSERT'
+                WHEN p_policy_name LIKE '%UPDATE%' THEN 'UPDATE'
+                WHEN p_policy_name LIKE '%DELETE%' THEN 'DELETE'
+                ELSE 'UNKNOWN'
+              END;
 
-  -- Lấy SQL_TEXT an toàn
-  IF v_sql_id IS NOT NULL THEN
-BEGIN
-SELECT SQL_FULLTEXT INTO v_sql_text
-FROM V$SQL
-WHERE SQL_ID = v_sql_id AND ROWNUM = 1;
-EXCEPTION
-      WHEN NO_DATA_FOUND THEN
-        v_sql_text := 'UNKNOWN SQL';
-WHEN OTHERS THEN
-        v_sql_text := 'ERROR FETCHING SQL TEXT';
-END;
-ELSE
-    v_sql_text := 'NO SQL_ID AVAILABLE';
-END IF;
+  INSERT INTO LOGS (
+    ACTOR, ROLE, ACTION, EVENT_TIME, POLICY_NAME, OBJECT_NAME
+  ) VALUES (
+    v_user_name,
+    v_user_role,
+    v_action,
+    SYSTIMESTAMP,
+    p_policy_name,
+    p_object_name
+  );
 
-  v_action := NVL(SYS_CONTEXT('USERENV', 'ACTION'), 'UNKNOWN');
-
-  -- Ghi log
-INSERT INTO LOGS (
-    ACTOR, ROLE, ACTION, EVENT_TIME, POLICY_NAME, OBJECT_NAME, SQL_TEXT
-) VALUES (
-             v_user_name,
-             v_user_role,
-             v_action,
-             SYSTIMESTAMP,
-             p_policy_name,
-             p_object_name,
-             v_sql_text
-         );
 EXCEPTION
   WHEN OTHERS THEN
     NULL;
@@ -62,23 +42,25 @@ END;
 
 -- Xóa các policy cũ (nếu có)
 BEGIN
-  DBMS_FGA.drop_policy('GROUP5_USER', 'RESIDENT_DATA', 'FGA_RESIDENT_DATA_XT');
-  DBMS_FGA.drop_policy('GROUP5_USER', 'FORM_REGISTRATION', 'FGA_FORM_REG_XT_XD');
-  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_APPROVAL_XT');
-  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_APPROVAL_XD');
-  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_APPROVAL_LT');
-  DBMS_FGA.drop_policy('GROUP5_USER', 'PASSPORTS', 'FGA_PASSPORT_LT');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'RESIDENT_DATA', 'FGA_SELECT_RESIDENT_DATA');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'FORM_REGISTRATION', 'FGA_SELECT_FORM_REGISTRATION');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'FORM_REGISTRATION', 'FGA_INSERT_FORM_REGISTRATION');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'FORM_REGISTRATION', 'FGA_UPDATE_FORM_REGISTRATION');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_SELECT_APPROVAL');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_INSERT_APPROVAL'); 
+  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_UPDATE_APPROVAL');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'APPROVAL_DATA', 'FGA_DELETE_APPROVAL');
+  DBMS_FGA.drop_policy('GROUP5_USER', 'PASSPORTS', 'FGA_INSERT_PASSPORT');
 EXCEPTION
   WHEN OTHERS THEN NULL;
 END;
 /
 
--- RESIDENT_DATA: XT
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
     object_name     => 'RESIDENT_DATA',
-    policy_name     => 'FGA_RESIDENT_DATA_XT',
+    policy_name     => 'FGA_SELECT_RESIDENT_DATA',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
     statement_types => 'SELECT',
     enable          => TRUE
@@ -86,25 +68,23 @@ BEGIN
 END;
 /
 
--- FORM_REGISTRATION: XT, XD
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
     object_name     => 'FORM_REGISTRATION',
-    policy_name     => 'FGA_FORM_REG_XT_XD',
+    policy_name     => 'FGA_SELECT_FORM_REGISTRATION',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
-    statement_types => 'SELECT,UPDATE',
+    statement_types => 'SELECT',
     enable          => TRUE
   );
 END;
 /
 
--- APPROVAL_DATA: XT
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
-    object_name     => 'APPROVAL_DATA',
-    policy_name     => 'FGA_APPROVAL_XT',
+    object_name     => 'FORM_REGISTRATION',
+    policy_name     => 'FGA_INSERT_FORM_REGISTRATION',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
     statement_types => 'INSERT',
     enable          => TRUE
@@ -112,38 +92,71 @@ BEGIN
 END;
 /
 
--- APPROVAL_DATA: XD
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
-    object_name     => 'APPROVAL_DATA',
-    policy_name     => 'FGA_APPROVAL_XD',
+    object_name     => 'FORM_REGISTRATION',
+    policy_name     => 'FGA_UPDATE_FORM_REGISTRATION',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
-    statement_types => 'SELECT,INSERT,UPDATE,DELETE',
+    statement_types => 'UPDATE',
     enable          => TRUE
   );
 END;
 /
 
--- APPROVAL_DATA: LT
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
     object_name     => 'APPROVAL_DATA',
-    policy_name     => 'FGA_APPROVAL_LT',
+    policy_name     => 'FGA_SELECT_APPROVAL',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
-    statement_types => 'SELECT,DELETE',
+    statement_types => 'SELECT',
     enable          => TRUE
   );
 END;
 /
 
--- PASSPORTS: LT
+BEGIN
+  DBMS_FGA.add_policy(
+    object_schema   => 'GROUP5_USER',
+    object_name     => 'APPROVAL_DATA',
+    policy_name     => 'FGA_INSERT_APPROVAL',
+    handler_module  => 'LOG_FGA_EVENT_HANDLER',
+    statement_types => 'INSERT',
+    enable          => TRUE
+  );
+END;
+/
+
+BEGIN
+  DBMS_FGA.add_policy(
+    object_schema   => 'GROUP5_USER',
+    object_name     => 'APPROVAL_DATA',
+    policy_name     => 'FGA_UPDATE_APPROVAL',
+    handler_module  => 'LOG_FGA_EVENT_HANDLER',
+    statement_types => 'UPDATE',
+    enable          => TRUE
+  );
+END;
+/
+
+BEGIN
+  DBMS_FGA.add_policy(
+    object_schema   => 'GROUP5_USER',
+    object_name     => 'APPROVAL_DATA',
+    policy_name     => 'FGA_DELETE_APPROVAL',
+    handler_module  => 'LOG_FGA_EVENT_HANDLER',
+    statement_types => 'DELETE',
+    enable          => TRUE
+  );
+END;
+/
+
 BEGIN
   DBMS_FGA.add_policy(
     object_schema   => 'GROUP5_USER',
     object_name     => 'PASSPORTS',
-    policy_name     => 'FGA_PASSPORT_LT',
+    policy_name     => 'FGA_INSERT_PASSPORT',
     handler_module  => 'LOG_FGA_EVENT_HANDLER',
     statement_types => 'INSERT',
     enable          => TRUE
