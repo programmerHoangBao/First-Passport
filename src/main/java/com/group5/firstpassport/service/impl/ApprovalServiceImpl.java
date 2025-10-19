@@ -5,18 +5,19 @@ import java.util.Optional;
 
 import com.group5.firstpassport.dto.response.ViewAllSendFromXDResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.response.ApprovalResponse;
+import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedApprovalResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
+import com.group5.firstpassport.enums.MessageCode;
 import com.group5.firstpassport.enums.ResultType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
@@ -35,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApprovalServiceImpl implements IApprovalService {
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
-  ModelMapper modelMapper;
 
   @Override
   @Transactional
@@ -77,12 +77,12 @@ public class ApprovalServiceImpl implements IApprovalService {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
     return approvals.map(approval -> {
-      ViewAllApprovalResponse response = modelMapper.map(approval, ViewAllApprovalResponse.class);
-      response.setFormId(approval.getRegistration().getId());
-      if (approval.getApproverBy() != null) {
-        response.setApproverBy(approval.getApproverBy().getUsername());
-      }
-      return response;
+      return ViewAllApprovalResponse.builder()
+                .approvalId(approval.getId())
+                .formId(approval.getRegistration().getId())
+                .approvedAt(approval.getApprovedAt())
+                .approverBy(approval.getApproverBy().getUsername())
+                .build();
     });
   }
 
@@ -95,11 +95,12 @@ public class ApprovalServiceImpl implements IApprovalService {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
     return approvals.map(approval -> {
-      ViewAllSendFromXDResponse response = new ViewAllSendFromXDResponse();
-      response.setCreatedBy(approval.getCreatedBy().getUsername());
-      response.setCreatedAt(approval.getCreatedAt());
-      response.setFormId(approval.getRegistration().getId());
-      return response;
+      return ViewAllSendFromXDResponse.builder()
+                  .approvalId(approval.getId())
+                  .formId(approval.getRegistration().getId())
+                  .createdAt(LocalDateTime.now())
+                  .createdBy(approval.getCreatedBy().getUsername())
+                  .build();
     });
   }
 
@@ -113,7 +114,6 @@ public class ApprovalServiceImpl implements IApprovalService {
     return ViewDetailedApprovalResponse.builder()
               .id(existsApproval.get().getId())
               .formId(existsApproval.get().getRegistration().getId())
-              .identityNumber(existsApproval.get().getRegistration().getResident().getIdentityNumber())
               .fullName(existsApproval.get().getRegistration().getFullName())
               .address(existsApproval.get().getRegistration().getAddress())
               .gender(existsApproval.get().getRegistration().getGender())
@@ -126,5 +126,33 @@ public class ApprovalServiceImpl implements IApprovalService {
               .createdBY(existsApproval.get().getCreatedBy().getUsername())
               .createdAt(existsApproval.get().getCreatedAt())
               .build();
+  }
+
+  @Override
+  @Transactional
+  public MessageResponse rejectApproval(Long approvalId, Long approverBy) {
+    Optional<ApprovalEntity> existsApproval = approvalRepository.findById(approvalId);
+    Optional<UserEntity> existsUser = userRepository.findById(approverBy);
+    if (existsApproval.isEmpty()) {
+      throw new BadRequestException(ErrorCode.APPROVAL_NO_EXISTS);
+    }
+    if (existsUser.isEmpty()) {
+      throw new BadRequestException(ErrorCode.USER_NO_EXIST);
+    }
+    ApprovalEntity approvalInput = existsApproval.get();
+    approvalInput.setResult(ResultType.REJECTED);
+    approvalInput.setApproverBy(existsUser.get());
+    approvalInput.setApprovedAt(LocalDateTime.now());
+    try {
+      approvalRepository.save(approvalInput);
+      return MessageResponse.builder()
+                .messageCode(MessageCode.REJECT_APPROVAL_SUCCESS)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+    catch (Exception ex) {
+      log.error(ex.getMessage());
+      throw new BadRequestException(ErrorCode.REJECT_APPROVAL_FAILED);
+    }
   }
 }

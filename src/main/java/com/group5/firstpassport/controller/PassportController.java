@@ -5,7 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.group5.firstpassport.dto.response.CreatePassportResponse;
 import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.service.impl.PassportServiceImpl;
 
@@ -23,17 +22,18 @@ public class PassportController {
   PassportServiceImpl passportService;
 
   @PostMapping("/create-passport")
-  public ResponseEntity<CreatePassportResponse> createPassport(
+  public ResponseEntity<MessageResponse> createPassport(
     @RequestParam Long approvalId,
     @RequestParam Long userId
   ) {
-    return ResponseEntity.ok(passportService.createPassport(approvalId, userId));
+    MessageResponse message = passportService.createPassport(approvalId, userId);
+    return ResponseEntity.status(message.getMessageCode().getHttpStatus()).body(message);
   }
 
   @GetMapping("/all-request-store")
   public ResponseEntity<Page<ViewAllRequestStoreResponse>> viewAllRequestStore(
-          @RequestParam int pageNumber,
-          @RequestParam int pageSize) {
+          @RequestParam(defaultValue = "0") int pageNumber,
+          @RequestParam(defaultValue = "10") int pageSize) {
     return ResponseEntity.ok(passportService.viewAllRequestStore(pageNumber, pageSize));
   }
 

@@ -21,22 +21,9 @@ public class PassportEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
-  private ResidentEntity resident;
-
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "APPROVAL_ID", nullable = false)
   private ApprovalEntity approval;
-
-  private String fullName;
-  private String address;
-
-  @Enumerated(EnumType.STRING)
-  private GenderType gender;
-  @Column(name = "PHONE", length = 10, nullable = false)
-  private String phone;
-  private String email;
   private LocalDateTime createdAt;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "CREATED_BY", nullable = false)

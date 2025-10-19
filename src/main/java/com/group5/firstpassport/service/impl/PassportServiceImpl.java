@@ -11,8 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.group5.firstpassport.dto.response.CreatePassportResponse;
 import com.group5.firstpassport.dto.response.ViewAllRequestStoreResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.PassportEntity;
@@ -38,10 +38,10 @@ public class PassportServiceImpl implements IPassportService{
   PassportRepository passportRepository;
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
-  ModelMapper modelMapper;
 
   @Override
-  public CreatePassportResponse createPassport(Long approvalId, Long userId) {
+  @Transactional
+  public MessageResponse createPassport(Long approvalId, Long userId) {
     Optional<ApprovalEntity> existsApproval = approvalRepository.findByIdAndResult(approvalId, ResultType.APPROVED);
     Optional<UserEntity> existsUser = userRepository.findById(userId);
     if (!existsApproval.isPresent()) {
@@ -51,12 +51,6 @@ public class PassportServiceImpl implements IPassportService{
       throw new BadRequestException(ErrorCode.USER_NO_EXIST);
     }
     PassportEntity passportInput = PassportEntity.builder()
-                          .resident(existsApproval.get().getRegistration().getResident())
-                          .fullName(existsApproval.get().getRegistration().getFullName())
-                          .address(existsApproval.get().getRegistration().getAddress())
-                          .gender(existsApproval.get().getRegistration().getGender())
-                          .phone(existsApproval.get().getRegistration().getPhone())
-                          .email(existsApproval.get().getRegistration().getEmail())
                           .createdAt(LocalDateTime.now())
                           .approval(existsApproval.get())
                           .createdBy(existsUser.get())
@@ -65,10 +59,14 @@ public class PassportServiceImpl implements IPassportService{
     if (passportSave.getId() == null) {
       throw new BadRequestException(ErrorCode.SAVE_PASSPORT_FAILED);
     }
-    return modelMapper.map(passportSave, CreatePassportResponse.class);
+    return MessageResponse.builder()
+                .messageCode(MessageCode.CREATE_PASSPORT_SUCCESS)
+                .timestamp(LocalDateTime.now())
+                .build();
   }
 
   @Override
+  @Transactional
   public Page<ViewAllRequestStoreResponse> viewAllRequestStore(int pageNumber, int pageSize) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
     Page<ApprovalEntity> approvals = approvalRepository.findAllByResult(ResultType.APPROVED, pageable);
@@ -85,6 +83,7 @@ public class PassportServiceImpl implements IPassportService{
   }
 
   @Override
+  @Transactional
   public MessageResponse rejectPassport(Long approvalId, Long userId) {
     Optional<ApprovalEntity> existsApproval = approvalRepository.findByIdAndResult(approvalId, ResultType.APPROVED);
     Optional<UserEntity> existsUser = userRepository.findById(userId);
