@@ -32,6 +32,7 @@ public enum ErrorCode {
   SAVE_PASSPORT_FAILED(1116, "Failed to save passport information!", HttpStatus.BAD_REQUEST),
   REJECT_FORM_FAILED(1117, "Failed to reject the passport application form.", HttpStatus.BAD_REQUEST),
   REJECT_REQUEST_STORE_FAILED(1118, "The request to deny passport creation failed.", HttpStatus.BAD_REQUEST),
+  APPROVAL_FAILED(1119, "Passport registration information verification failed!", HttpStatus.BAD_REQUEST),
   OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int responseCode;

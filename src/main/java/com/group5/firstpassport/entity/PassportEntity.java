@@ -39,6 +39,6 @@ public class PassportEntity {
   private String email;
   private LocalDateTime createdAt;
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(nullable = false)
+  @JoinColumn(name = "CREATED_BY", nullable = false)
   private UserEntity createdBy;
 }

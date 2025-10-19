@@ -38,8 +38,9 @@ public class AuthServiceImpl implements IAuthService {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         if (authentication.isAuthenticated()) {
-            String accessToken = JwtUtil.generateToken(loginRequest.getUsername());
-            String refreshToken = JwtUtil.generateRefreshToken(loginRequest.getUsername());
+            String userRole = existedUser.get().getRole().name();
+            String accessToken = JwtUtil.generateToken(loginRequest.getUsername(), userRole);
+            String refreshToken = JwtUtil.generateRefreshToken(loginRequest.getUsername(), userRole);
 
             return LoginResponse.builder()
                     .userId(existedUser.get().getId())

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GS Dashboard</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>GS - Giám sát luồng xử lý</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="register.html">Đăng ký</a>
+        <a href="xt-dashboard.html">XT</a>
+        <a href="xd-dashboard.html">XD</a>
+        <a href="lt-dashboard.html">LT</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="toolbar">
+          <h2>Nhật ký hoạt động</h2>
+          <button id="refresh" class="secondary">Tải lại</button>
+        </div>
+        <div id="msg"></div>
+        <div class="card">
+          <div class="pagination-controls">
+            <button id="prevPage" class="secondary" disabled>Trước</button>
+            <span id="pageInfo">Trang 1 / 1</span>
+            <button id="nextPage" class="secondary" disabled>Tiếp</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Người thực hiện</th>
+                <th>Vai trò</th>
+                <th>Hành động</th>
+                <th>Thời gian</th>
+                <th>Chính sách</th>
+                <th>Đối tượng</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiGet } from '../js/api.js';
+      import { $, showMessage, formatDate } from '../js/utils.js';
+      import { requireRole } from '../js/auth.js';
+
+      // chỉ cho phép vai trò GS
+      requireRole('GS');
+
+      const rows = $('#rows');
+      const msg = $('#msg');
+      const refresh = $('#refresh');
+      const prevPage = $('#prevPage');
+      const nextPage = $('#nextPage');
+      const pageInfo = $('#pageInfo');
+
+      let currentPage = 0;
+      let totalPages = 1;
+      const pageSize = 10;
+
+      async function load(){
+        msg.innerHTML = '';
+        rows.innerHTML = '<tr><td colspan="8">Đang tải...</td></tr>';
+        try{
+          const response = await apiGet(`/api/gs/view-all-log?pageNumber=${currentPage}&pageSize=${pageSize}`);
+          
+          // Cập nhật thông tin phân trang
+          totalPages = response.totalPages || 1;
+          pageInfo.textContent = `Trang ${currentPage + 1} / ${totalPages}`;
+          
+          // Cập nhật trạng thái nút phân trang
+          prevPage.disabled = currentPage === 0;
+          nextPage.disabled = currentPage >= totalPages - 1;
+          
+          // Hiển thị dữ liệu
+          if (response.content && response.content.length > 0) {
+            rows.innerHTML = response.content.map(log => `
+              <tr>
+                <td>${log.id || ''}</td>
+                <td>${log.actor || ''}</td>
+                <td>${log.role || ''}</td>
+                <td>${log.action || ''}</td>
+                <td>${formatDate(log.eventTime)}</td>
+                <td>${log.policyName || ''}</td>
+                <td>${log.objectName || ''}</td>
+              </tr>
+            `).join('');
+          } else {
+            rows.innerHTML = '<tr><td colspan="8">Không có dữ liệu</td></tr>';
+          }
+        }catch(err){
+          rows.innerHTML = '';
+          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+        }
+      }
+
+      function goToPage(page) {
+        if (page >= 0 && page < totalPages) {
+          currentPage = page;
+          load();
+        }
+      }
+
+      refresh.addEventListener('click', () => {
+        currentPage = 0;
+        load();
+      });
+      
+      prevPage.addEventListener('click', () => goToPage(currentPage - 1));
+      nextPage.addEventListener('click', () => goToPage(currentPage + 1));
+      
+      load();
+    </script>
+  </body>
+  </html>
+
+

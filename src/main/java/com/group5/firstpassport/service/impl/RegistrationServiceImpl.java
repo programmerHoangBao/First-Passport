@@ -3,6 +3,7 @@ package com.group5.firstpassport.service.impl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +17,6 @@ import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.RegistrationEntity;
-import com.group5.firstpassport.entity.ResidentEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
 import com.group5.firstpassport.enums.MessageCode;
@@ -24,7 +24,6 @@ import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
 import com.group5.firstpassport.repository.RegistrationRepository;
-import com.group5.firstpassport.repository.ResidentRepository;
 import com.group5.firstpassport.repository.UserRepository;
 import com.group5.firstpassport.service.IRegistrationService;
 
@@ -35,22 +34,17 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
+@Slf4j
 public class RegistrationServiceImpl implements IRegistrationService {
   RegistrationRepository registrationRepository;
-  ResidentRepository residentRepository;
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
   ModelMapper modelMapper;
   
   @Override
   public RegistrationResponse registration(RegistrationRequest registrationRequest) {
-      Optional<ResidentEntity> residentEntityOptional = residentRepository.findByIdentityNumber(registrationRequest.getIdentityNumber());
-      if (!residentEntityOptional.isPresent()) {
-        throw new BadRequestException(ErrorCode.RESIDENT_NOT_FOUND);
-      }
-      ResidentEntity residentEntity = residentEntityOptional.get();
+
       RegistrationEntity registrationInput = modelMapper.map(registrationRequest, RegistrationEntity.class);
-      registrationInput.setResident(residentEntity);
       RegistrationEntity registrationSave = registrationRepository.save(registrationInput);
       return modelMapper.map(registrationSave, RegistrationResponse.class);
   }
@@ -67,7 +61,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
     return registrationEntities.map(registration ->
         ViewAllRegistrationResponse.builder()
             .id(registration.getId())
-            .identityNumber(registration.getResident().getIdentityNumber())
+            .identityNumber(registration.getIdentityNumber())
             .fullName(registration.getFullName())
             .address(registration.getAddress())
             .gender(registration.getGender())
@@ -86,7 +80,7 @@ public class RegistrationServiceImpl implements IRegistrationService {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
     }
     ViewDetailedRegistrationResponse response = modelMapper.map(existsRegistration.get(), ViewDetailedRegistrationResponse.class);
-    response.setIdentityNumber(existsRegistration.get().getResident().getIdentityNumber());
+    response.setIdentityNumber(existsRegistration.get().getIdentityNumber());
     return response;
   }
 
@@ -97,17 +91,20 @@ public class RegistrationServiceImpl implements IRegistrationService {
     if (!existsFrom.isPresent()) {
       throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
     }
-    if (!existsUser.isPresent()) {
+    if (existsUser.isEmpty()) {
       throw new BadRequestException(ErrorCode.USER_NO_EXIST);
     }
-    ApprovalEntity approval = ApprovalEntity.builder()
-            .registration(existsFrom.get())
-            .createdBy(existsUser.get())
-            .createdAt(LocalDateTime.now())
-            .build();
-    if (approvalRepository.save(approval).getId() == null) {
+    log.info("User ID = {}", existsUser.get().getId());
+    log.info("User name = {}", existsUser.get().getFullName());
+    ApprovalEntity approval = new ApprovalEntity();
+    approval.setRegistration(existsFrom.get());
+    approval.setCreatedBy(existsUser.get());
+    approval.setCreatedAt(LocalDateTime.now());
+    ApprovalEntity approvalSave = approvalRepository.save(approval);
+    if (approvalSave.getId() == null) {
       throw new BadRequestException(ErrorCode.SEND_FROM_REGISTRATION_FALIED);
     }
+    log.info("Create By = {}", approvalSave.getCreatedBy().getUsername());
     RegistrationEntity updateForm = existsFrom.get();
     updateForm.setStatus(StatusType.VERIFIED);
     registrationRepository.save(updateForm);

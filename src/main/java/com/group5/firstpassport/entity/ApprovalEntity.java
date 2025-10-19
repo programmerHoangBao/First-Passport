@@ -33,8 +33,8 @@ public class ApprovalEntity {
   @JoinColumn(name = "APPROVER_USER_ID")
   private UserEntity approverBy;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(nullable = false)
+  @ManyToOne
+  @JoinColumn(name = "CREATED_BY",nullable = false)
   private UserEntity createdBy;
 
   @Column(nullable = false)

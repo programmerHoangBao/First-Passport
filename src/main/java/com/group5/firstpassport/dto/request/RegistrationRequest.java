@@ -21,7 +21,7 @@ public class RegistrationRequest {
   private String fullName;
   @NotBlank(message = "Address should not be blank")
   private String address;
-  private GenderType gender = GenderType.MALE;
+  private GenderType gender;
   @Pattern(regexp = "^\\d{10}$", message = "Phone number must contain 10 digits")
   @NotBlank(message = "Phone number should not be blank")
   private String phone;

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XT Dashboard</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>XT - Xác thực hồ sơ</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="register.html">Đăng ký</a>
+        <a href="xd-dashboard.html">XD</a>
+        <a href="lt-dashboard.html">LT</a>
+        <a href="gs-dashboard.html">GS</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="toolbar" style="gap:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <h2>Danh sách hồ sơ</h2>
+            <span id="count" class="badge">0</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <a href="view-resident.html" class="secondary" style="text-decoration:none;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);">👤 Xem thông tin cư dân</a>
+            <label class="sr-only" for="status">Trạng thái</label>
+            <select id="status">
+              <option value="PENDING">PENDING</option>
+              <option value="VERIFIED">VERIFIED</option>
+              <option value="REJECTED">REJECTED</option>
+            </select>
+            <label class="sr-only" for="pageSize">Kích thước trang</label>
+            <select id="pageSize">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+            </select>
+            <button id="prev" class="secondary">« Trước</button>
+            <button id="next" class="secondary">Sau »</button>
+          </div>
+        </div>
+        <div id="hint" class="badge">XT_USER_ID: <span id="xtUser">(mặc định 1)</span></div>
+        <div id="msg" style="margin-top:8px"></div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã hồ sơ</th>
+                <th>Họ tên</th>
+                <th>CMND</th>
+                <th>Email</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiGet, apiPost } from '../js/api.js';
+      import { $, showMessage } from '../js/utils.js';
+      import { requireRole } from '../js/auth.js';
+
+      // chỉ cho phép vai trò XT
+      requireRole('XT');
+
+      const rows = $('#rows');
+      const msg = $('#msg');
+      const count = $('#count');
+      const statusSel = $('#status');
+      const pageSizeSel = $('#pageSize');
+      const prevBtn = $('#prev');
+      const nextBtn = $('#next');
+      const xtUserSpan = $('#xtUser');
+
+      const state = { status: 'PENDING', pageSize: 10, pageNumber: 0, totalPages: 1 };
+
+      function getXtUserId(){
+        const v = localStorage.getItem('XT_USER_ID');
+        return v ? Number(v) : 1;
+      }
+      function setXtUserHint(){ xtUserSpan.textContent = String(getXtUserId()); }
+
+      async function load(){
+        msg.innerHTML = '';
+        rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
+        try{
+          const query = `?status=${encodeURIComponent(state.status)}&pageSize=${state.pageSize}&pageNumber=${state.pageNumber}`;
+          const page = await apiGet('/api/xt/view-all-registration' + query);
+          const list = page?.content || [];
+          count.textContent = String(list.length);
+          state.totalPages = page?.totalPages ?? 1;
+          prevBtn.disabled = state.pageNumber <= 0;
+          nextBtn.disabled = state.pageNumber >= state.totalPages - 1;
+          rows.innerHTML = list.map(it=>`
+            <tr>
+              <td>${it.id ?? ''}</td>
+              <td>${it.fullName ?? ''}</td>
+              <td>${it.identityNumber ?? ''}</td>
+              <td>${it.email ?? ''}</td>
+              <td>
+                <button class="success" data-send="${it.id}">Gửi sang XD</button>
+              </td>
+            </tr>
+          `).join('');
+        }catch(err){
+          rows.innerHTML = '';
+          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+        }
+      }
+
+      rows.addEventListener('click', async (e)=>{
+        const btn = e.target.closest('button[data-send]');
+        if(!btn) return;
+        const id = btn.getAttribute('data-send');
+        btn.disabled = true;
+        try{
+          const xtUserId = getXtUserId();
+          await apiPost(`/api/xt/send-form?formId=${encodeURIComponent(id)}&userId=${encodeURIComponent(xtUserId)}`, {});
+          await load();
+        }catch(err){
+          showMessage(msg, 'error', err.message || 'Thao tác thất bại');
+        }finally{
+          btn.disabled = false;
+        }
+      });
+
+      statusSel.addEventListener('change', ()=>{ state.status = statusSel.value; state.pageNumber = 0; load(); });
+      pageSizeSel.addEventListener('change', ()=>{ state.pageSize = Number(pageSizeSel.value); state.pageNumber = 0; load(); });
+      prevBtn.addEventListener('click', ()=>{ if(state.pageNumber>0){ state.pageNumber--; load(); }});
+      nextBtn.addEventListener('click', ()=>{ if(state.pageNumber < state.totalPages-1){ state.pageNumber++; load(); }});
+
+      // Helper: đặt XT_USER_ID nhanh từ console: localStorage.setItem('XT_USER_ID','1')
+      setXtUserHint();
+      load();
+    </script>
+  </body>
+  </html>
+
+

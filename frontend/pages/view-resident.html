@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Xem thông tin cư dân - XT</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>XT - Xem thông tin cư dân</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="xt-dashboard.html">XT Dashboard</a>
+        <a href="xd-dashboard.html">XD</a>
+        <a href="lt-dashboard.html">LT</a>
+        <a href="gs-dashboard.html">GS</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="toolbar">
+          <h2>Tìm kiếm thông tin cư dân</h2>
+          <button id="backBtn" class="secondary">← Quay lại</button>
+        </div>
+        
+        <div id="msg"></div>
+        
+        <!-- Form tìm kiếm -->
+        <div class="card">
+          <form id="searchForm">
+            <div class="grid grid-2">
+              <div>
+                <label for="identityNumber">Số CMND/CCCD</label>
+                <input 
+                  type="text" 
+                  id="identityNumber" 
+                  placeholder="Nhập 12 chữ số" 
+                  pattern="[0-9]{12}" 
+                  maxlength="12"
+                  required
+                >
+                <small style="color: var(--muted); font-size: 12px;">
+                  Vui lòng nhập đúng 12 chữ số
+                </small>
+              </div>
+              <div style="display: flex; align-items: end;">
+                <button type="submit" id="searchBtn">Tìm kiếm</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Kết quả hiển thị -->
+        <div id="resultSection" class="card" style="display: none;">
+          <h3>Thông tin cư dân</h3>
+          <div id="residentInfo"></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiGet } from '../js/api.js';
+      import { $, showMessage, formatDate } from '../js/utils.js';
+      import { requireRole } from '../js/auth.js';
+
+      // Chỉ cho phép vai trò XT
+      requireRole('XT');
+
+      const searchForm = $('#searchForm');
+      const identityNumberInput = $('#identityNumber');
+      const searchBtn = $('#searchBtn');
+      const resultSection = $('#resultSection');
+      const residentInfo = $('#residentInfo');
+      const msg = $('#msg');
+      const backBtn = $('#backBtn');
+
+      // Xử lý form tìm kiếm
+      searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await searchResident();
+      });
+
+      // Xử lý input chỉ cho phép số
+      identityNumberInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      });
+
+      // Xử lý nút quay lại
+      backBtn.addEventListener('click', () => {
+        window.history.back();
+      });
+
+      async function searchResident() {
+        const identityNumber = identityNumberInput.value.trim();
+        
+        if (!identityNumber || identityNumber.length !== 12) {
+          showMessage(msg, 'error', 'Vui lòng nhập đúng 12 chữ số CMND/CCCD');
+          return;
+        }
+
+        msg.innerHTML = '';
+        searchBtn.disabled = true;
+        searchBtn.textContent = 'Đang tìm...';
+        resultSection.style.display = 'none';
+
+        try {
+          const response = await apiGet(`/api/xt/view-detail-resident?identityNumber=${identityNumber}`);
+          
+          // Hiển thị thông tin cư dân
+          displayResidentInfo(response);
+          resultSection.style.display = 'block';
+          
+        } catch (error) {
+          showMessage(msg, 'error', error.message || 'Không tìm thấy thông tin cư dân');
+          resultSection.style.display = 'none';
+        } finally {
+          searchBtn.disabled = false;
+          searchBtn.textContent = 'Tìm kiếm';
+        }
+      }
+
+      function displayResidentInfo(resident) {
+        const genderText = resident.gender === 'MALE' ? 'Nam' : 
+                          resident.gender === 'FEMALE' ? 'Nữ' : 
+                          resident.gender || 'Không xác định';
+        
+        const birthDate = resident.dateOfBirth ? 
+          new Date(resident.dateOfBirth).toLocaleDateString('vi-VN') : 
+          'Không xác định';
+
+        residentInfo.innerHTML = `
+          <div class="grid grid-2">
+            <div>
+              <label>Số CMND/CCCD</label>
+              <div class="info-value">${resident.identityNumber || 'Không có'}</div>
+            </div>
+            <div>
+              <label>Họ và tên</label>
+              <div class="info-value">${resident.fullName || 'Không có'}</div>
+            </div>
+            <div>
+              <label>Ngày sinh</label>
+              <div class="info-value">${birthDate}</div>
+            </div>
+            <div>
+              <label>Giới tính</label>
+              <div class="info-value">${genderText}</div>
+            </div>
+            <div>
+              <label>Địa chỉ</label>
+              <div class="info-value">${resident.address || 'Không có'}</div>
+            </div>
+            <div>
+              <label>Số điện thoại</label>
+              <div class="info-value">${resident.phone || 'Không có'}</div>
+            </div>
+            <div>
+              <label>Email</label>
+              <div class="info-value">${resident.email || 'Không có'}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Focus vào input khi load trang
+      identityNumberInput.focus();
+    </script>
+
+    <style>
+      .info-value {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 4px;
+        font-weight: 500;
+        min-height: 20px;
+      }
+      
+      .grid-2 > div {
+        margin-bottom: 16px;
+      }
+      
+      #searchForm .grid-2 > div:last-child {
+        margin-bottom: 0;
+      }
+      
+      small {
+        display: block;
+        margin-top: 4px;
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý cấp hộ chiếu - Frontend</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>Quản lý cấp hộ chiếu</h1>
+      <nav class="nav">
+        <a href="pages/register.html">Đăng ký cấp hộ chiếu</a>
+        <a href="pages/login.html">Đăng nhập</a>
+        <a class="protected protected-XT" href="pages/xt-dashboard.html" style="display:none">XT Dashboard</a>
+        <a class="protected protected-XD" href="pages/xd-dashboard.html" style="display:none">XD Dashboard</a>
+        <a class="protected protected-LT" href="pages/lt-dashboard.html" style="display:none">LT Dashboard</a>
+        <a class="protected protected-GS" href="pages/gs-dashboard.html" style="display:none">GS Dashboard</a>
+      </nav>
+    </header>
+    <main class="container">
+      <section class="card">
+        <h2>Hệ thống quản lý cấp hộ chiếu</h2>
+        <p>Chọn trang nghiệp vụ ở thanh điều hướng để bắt đầu.</p>
+      </section>
+    </main>
+    <script type="module">
+      import { getToken, getRole } from './js/auth.js';
+      const token = getToken();
+      const role = (getRole()||'').toUpperCase().replace(/^ROLE_/,'');
+      if (token && role) {
+        document.querySelectorAll('.protected').forEach(el=>{
+          el.style.display = 'none';
+        });
+        const el = document.querySelector('.protected-' + role);
+        if (el) el.style.display = '';
+      }
+    </script>
+  </body>
+  </html>
+
+

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LT Dashboard</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="container header">
+      <h1>LT - Lưu trữ hồ sơ đã phê duyệt</h1>
+      <nav class="nav">
+        <a href="../index.html">Trang chủ</a>
+        <a href="register.html">Đăng ký</a>
+        <a href="xt-dashboard.html">XT</a>
+        <a href="xd-dashboard.html">XD</a>
+        <a href="gs-dashboard.html">GS</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="toolbar">
+          <h2>Danh sách hồ sơ đã phê duyệt</h2>
+          <span id="count" class="badge">0</span>
+        </div>
+        <div id="msg"></div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã hồ sơ</th>
+                <th>Trạng thái</th>
+                <th>Ngày cập nhật</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { apiGet } from '../js/api.js';
+      import { $, showMessage, formatDate } from '../js/utils.js';
+      import { requireRole } from '../js/auth.js';
+
+      // chỉ cho phép vai trò LT
+      requireRole('LT');
+
+      const rows = $('#rows');
+      const msg = $('#msg');
+      const count = $('#count');
+
+      async function load(){
+        msg.innerHTML = '';
+        rows.innerHTML = '<tr><td colspan="3">Đang tải...</td></tr>';
+        try{
+          const data = await apiGet('/api/passport/approved');
+          count.textContent = String(data?.length || 0);
+          rows.innerHTML = (data||[]).map(it=>`
+            <tr>
+              <td>${it.id ?? ''}</td>
+              <td><span class="badge">${it.status ?? 'APPROVED'}</span></td>
+              <td>${formatDate(it.updatedAt||it.approvedAt)}</td>
+            </tr>
+          `).join('');
+        }catch(err){
+          rows.innerHTML = '';
+          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+        }
+      }
+
+      load();
+    </script>
+  </body>
+  </html>
+
+

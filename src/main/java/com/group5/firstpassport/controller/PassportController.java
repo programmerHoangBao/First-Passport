@@ -25,9 +25,9 @@ public class PassportController {
   @PostMapping("/create-passport")
   public ResponseEntity<CreatePassportResponse> createPassport(
     @RequestParam Long approvalId,
-    @RequestParam Long usserId
+    @RequestParam Long userId
   ) {
-    return ResponseEntity.ok(passportService.createPassport(approvalId, usserId));
+    return ResponseEntity.ok(passportService.createPassport(approvalId, userId));
   }
 
   @GetMapping("/all-request-store")

@@ -20,9 +20,10 @@ public class RegistrationEntity {
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "IDENTITY_NUMBER", nullable = false)
+  @JoinColumn(name = "RESIDENT_ID", referencedColumnName = "IDENTITY_NUMBER")
   private ResidentEntity resident;
-
+  @Column(name = "IDENTITY_NUMBER",nullable = false)
+  private String identityNumber;
   private String fullName;
   private String address;
   @Enumerated(EnumType.STRING)
