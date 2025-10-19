@@ -1,5 +1,6 @@
 package com.group5.firstpassport.controller;
 
+import com.group5.firstpassport.dto.response.ViewAllSendFromXDResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -51,7 +52,7 @@ public class ApprovalController {
   }
 
   @GetMapping("/all-send-from-to-xd")
-  public ResponseEntity<Page<ViewAllApprovalResponse>> viewAllApprovalByResultIsNull(
+  public ResponseEntity<Page<ViewAllSendFromXDResponse>> viewAllApprovalByResultIsNull(
     @RequestParam(defaultValue = "0") int pageNumber,
     @RequestParam(defaultValue = "10") int pageSize
   ) {

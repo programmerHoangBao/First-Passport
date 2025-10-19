@@ -1,6 +1,7 @@
 import { apiPost } from './api.js';
 
 export function getToken(){ return localStorage.getItem('accessToken'); }
+export function getRefreshToken(){ return localStorage.getItem('refreshToken'); }
 export function getRole(){
 	const cached = localStorage.getItem('role');
 	if (cached) return cached;
@@ -13,13 +14,13 @@ export function getRole(){
 export function isLoggedIn(){ return Boolean(getToken()); }
 
 export function saveAuth(resp){
-	// cố gắng bắt token theo các tên phổ biến
-	const token = resp?.accessToken || resp?.token || resp?.jwt || null;
-	let role = resp?.role || resp?.authorities?.[0]?.authority || resp?.authorities?.[0]?.name || null;
-	if (token) localStorage.setItem('accessToken', token);
-	// Nếu response không có role, thử bóc từ JWT
-	if (!role && token) role = deriveRoleFromToken(token);
-	if (role) localStorage.setItem('role', normalizeRole(role));
+	// Lưu accessToken từ response
+	const token = resp?.accessToken || null;
+	if (token) {
+		localStorage.setItem('accessToken', token);
+		localStorage.setItem('refreshToken', resp.refreshToken);
+	}
+	
 }
 
 export function normalizeRole(role){
@@ -29,10 +30,14 @@ export function normalizeRole(role){
 
 export function logout(){
 	localStorage.removeItem('accessToken');
+	localStorage.removeItem('refreshToken');
 	localStorage.removeItem('role');
 }
 
 export async function login(username, password){
+	// Xóa tất cả dữ liệu trong localStorage trước khi đăng nhập
+	localStorage.clear();
+	
 	const res = await apiPost('/api/login', { username, password });
 	saveAuth(res);
 	return getRole();

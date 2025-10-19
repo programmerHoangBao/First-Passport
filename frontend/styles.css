@@ -23,5 +23,8 @@ th,td{padding:10px;border-bottom:1px solid var(--border)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .error{background:#7f1d1d;color:#fecaca;border:1px solid #b91c1c;padding:8px;border-radius:8px}
 .success{background:#052e1a;color:#bbf7d0;border:1px solid #166534;padding:8px;border-radius:8px}
+.pagination-controls{display:flex;gap:12px;align-items:center;justify-content:center;margin:16px 0}
+.pagination-controls button:disabled{opacity:0.5;cursor:not-allowed}
+.pagination-controls span{color:var(--muted);font-size:14px}
 
 

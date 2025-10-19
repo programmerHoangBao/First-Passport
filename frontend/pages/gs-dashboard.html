@@ -26,14 +26,21 @@
         </div>
         <div id="msg"></div>
         <div class="card">
+          <div class="pagination-controls">
+            <button id="prevPage" class="secondary" disabled>Trước</button>
+            <span id="pageInfo">Trang 1 / 1</span>
+            <button id="nextPage" class="secondary" disabled>Tiếp</button>
+          </div>
           <table>
             <thead>
               <tr>
-                <th>Thời gian</th>
-                <th>Mã hồ sơ</th>
+                <th>ID</th>
+                <th>Người thực hiện</th>
+                <th>Vai trò</th>
                 <th>Hành động</th>
-                <th>Đơn vị</th>
-                <th>Ghi chú</th>
+                <th>Thời gian</th>
+                <th>Chính sách</th>
+                <th>Đối tượng</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -53,28 +60,65 @@
       const rows = $('#rows');
       const msg = $('#msg');
       const refresh = $('#refresh');
+      const prevPage = $('#prevPage');
+      const nextPage = $('#nextPage');
+      const pageInfo = $('#pageInfo');
+
+      let currentPage = 0;
+      let totalPages = 1;
+      const pageSize = 10;
 
       async function load(){
         msg.innerHTML = '';
-        rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
+        rows.innerHTML = '<tr><td colspan="8">Đang tải...</td></tr>';
         try{
-          const data = await apiGet('/api/passport/logs');
-          rows.innerHTML = (data||[]).map(it=>`
-            <tr>
-              <td>${formatDate(it.timestamp)}</td>
-              <td>${it.passportId ?? it.registrationId ?? ''}</td>
-              <td>${it.action ?? ''}</td>
-              <td>${it.department ?? ''}</td>
-              <td>${it.note ?? ''}</td>
-            </tr>
-          `).join('');
+          const response = await apiGet(`/api/gs/view-all-log?pageNumber=${currentPage}&pageSize=${pageSize}`);
+          
+          // Cập nhật thông tin phân trang
+          totalPages = response.totalPages || 1;
+          pageInfo.textContent = `Trang ${currentPage + 1} / ${totalPages}`;
+          
+          // Cập nhật trạng thái nút phân trang
+          prevPage.disabled = currentPage === 0;
+          nextPage.disabled = currentPage >= totalPages - 1;
+          
+          // Hiển thị dữ liệu
+          if (response.content && response.content.length > 0) {
+            rows.innerHTML = response.content.map(log => `
+              <tr>
+                <td>${log.id || ''}</td>
+                <td>${log.actor || ''}</td>
+                <td>${log.role || ''}</td>
+                <td>${log.action || ''}</td>
+                <td>${formatDate(log.eventTime)}</td>
+                <td>${log.policyName || ''}</td>
+                <td>${log.objectName || ''}</td>
+              </tr>
+            `).join('');
+          } else {
+            rows.innerHTML = '<tr><td colspan="8">Không có dữ liệu</td></tr>';
+          }
         }catch(err){
           rows.innerHTML = '';
           showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
         }
       }
 
-      refresh.addEventListener('click', load);
+      function goToPage(page) {
+        if (page >= 0 && page < totalPages) {
+          currentPage = page;
+          load();
+        }
+      }
+
+      refresh.addEventListener('click', () => {
+        currentPage = 0;
+        load();
+      });
+      
+      prevPage.addEventListener('click', () => goToPage(currentPage - 1));
+      nextPage.addEventListener('click', () => goToPage(currentPage + 1));
+      
       load();
     </script>
   </body>

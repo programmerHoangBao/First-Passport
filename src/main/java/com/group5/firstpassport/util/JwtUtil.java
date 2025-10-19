@@ -33,19 +33,26 @@ public class JwtUtil {
     instance = this;
   }
 
-  public static String generateToken(String username) {
+  public static String generateToken(String username, String role) {
     ensureInitialized();
-    return instance.createToken(Map.of(), username, instance.tokenExpirationMs);
+    Map<String, Object> claims = Map.of("role", role);
+    return instance.createToken(claims, username, instance.tokenExpirationMs);
   }
 
-  public static String generateRefreshToken(String username) {
+  public static String generateRefreshToken(String username, String role) {
     ensureInitialized();
-    return instance.createToken(Map.of(), username, instance.refreshTokenExpirationMs);
+    Map<String, Object> claims = Map.of("role", role);
+    return instance.createToken(claims, username, instance.refreshTokenExpirationMs);
   }
 
   public static String extractUsername(String token) {
     ensureInitialized();
     return instance.extractClaim(token, Claims::getSubject);
+  }
+
+  public static String extractRole(String token) {
+    ensureInitialized();
+    return instance.extractClaim(token, claims -> claims.get("role", String.class));
   }
 
   public static boolean validateToken(String token, UserDetails userDetails) {

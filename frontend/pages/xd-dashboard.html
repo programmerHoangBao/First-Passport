@@ -21,8 +21,15 @@
     <main class="container">
       <section class="card">
         <div class="toolbar">
-          <h2>Danh sách hồ sơ chờ xét duyệt</h2>
-          <span id="count" class="badge">0</span>
+          <h2>Danh sách hồ sơ</h2>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="filter-status">
+              <option value="pending">Chờ xét duyệt</option>
+              <option value="approved">Đã phê duyệt</option>
+              <option value="rejected">Đã từ chối</option>
+            </select>
+            <span id="count" class="badge">0</span>
+          </div>
         </div>
         <div id="msg"></div>
         <div class="card">
@@ -43,7 +50,7 @@
     </main>
 
     <script type="module">
-      import { apiGet, apiPut } from '../js/api.js';
+      import { apiGet, apiPost } from '../js/api.js';
       import { $, showMessage } from '../js/utils.js';
       import { requireRole } from '../js/auth.js';
 
@@ -53,25 +60,50 @@
       const rows = $('#rows');
       const msg = $('#msg');
       const count = $('#count');
+      const filterStatus = $('#filter-status');
 
       async function load(){
         msg.innerHTML = '';
         rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
+        
+        const selectedFilter = filterStatus.value;
+        
         try{
-          const data = await apiGet('/api/passport/pending-approval');
-          count.textContent = String(data?.length || 0);
-          rows.innerHTML = (data||[]).map(it=>`
-            <tr>
-              <td>${it.id ?? ''}</td>
-              <td>${it.fullName ?? ''}</td>
-              <td>${it.identityNumber ?? ''}</td>
-              <td>${it.email ?? ''}</td>
-              <td>
-                <button class="success" data-approve="${it.id}">Phê duyệt</button>
-                <button class="danger" data-reject="${it.id}">Từ chối</button>
-              </td>
-            </tr>
-          `).join('');
+          let data;
+          
+          if (selectedFilter === 'pending') {
+            // Lấy danh sách hồ sơ chưa được xét duyệt
+            data = await apiGet('/api/xd/all-send-from-to-xd?pageNumber=0&pageSize=100');
+          } else {
+            // Lấy danh sách hồ sơ đã được xét duyệt
+            const result = selectedFilter === 'approved' ? 'APPROVED' : 'REJECTED';
+            data = await apiGet(`/api/xd/all-approval-by-result?result=${result}&pageNumber=0&pageSize=100`);
+          }
+          
+          // Lấy content từ response (vì API trả về Page object)
+          const content = data?.content || [];
+          count.textContent = String(content?.length || 0);
+          
+          rows.innerHTML = content.map(it=>{
+            const actionButtons = selectedFilter === 'pending' ? `
+              <button class="success" data-approve="${it.id}">Phê duyệt</button>
+              <button class="danger" data-reject="${it.id}">Từ chối</button>
+            ` : `
+              <span class="badge ${selectedFilter === 'approved' ? 'success' : 'danger'}">
+                ${selectedFilter === 'approved' ? 'Đã phê duyệt' : 'Đã từ chối'}
+              </span>
+            `;
+            
+            return `
+              <tr>
+                <td>${it.id ?? ''}</td>
+                <td>${it.fullName ?? ''}</td>
+                <td>${it.identityNumber ?? ''}</td>
+                <td>${it.email ?? ''}</td>
+                <td>${actionButtons}</td>
+              </tr>
+            `;
+          }).join('');
         }catch(err){
           rows.innerHTML = '';
           showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
@@ -82,18 +114,45 @@
         const approveBtn = e.target.closest('button[data-approve]');
         const rejectBtn = e.target.closest('button[data-reject]');
         if(!approveBtn && !rejectBtn) return;
-        const id = (approveBtn||rejectBtn).getAttribute('data-approve') || (approveBtn||rejectBtn).getAttribute('data-reject');
-        (approveBtn||rejectBtn).disabled = true;
+        
+        const approvalId = (approveBtn||rejectBtn).getAttribute('data-approve') || (approveBtn||rejectBtn).getAttribute('data-reject');
+        const button = (approveBtn||rejectBtn);
+        button.disabled = true;
+        
         try{
-          if (approveBtn) await apiPut(`/api/passport/approve/${id}`);
-          if (rejectBtn) await apiPut(`/api/passport/reject/${id}`);
+          // Lấy thông tin user hiện tại từ token hoặc context
+          // Tạm thời sử dụng ID = 1, cần cải thiện để lấy từ user context thực tế
+          const currentUserId = 1;
+          
+          if (approveBtn) {
+            await apiPost('/api/xd/approval', {
+              formId: parseInt(approvalId),
+              result: 'APPROVED',
+              approvedAt: new Date().toISOString(),
+              approverBy: currentUserId
+            });
+          }
+          
+          if (rejectBtn) {
+            await apiPost('/api/xd/approval', {
+              formId: parseInt(approvalId),
+              result: 'REJECTED',
+              approvedAt: new Date().toISOString(),
+              approverBy: currentUserId
+            });
+          }
+          
           await load();
+          showMessage(msg, 'success', button.textContent + ' thành công!');
         }catch(err){
           showMessage(msg, 'error', err.message || 'Thao tác thất bại');
         }finally{
-          (approveBtn||rejectBtn).disabled = false;
+          button.disabled = false;
         }
       });
+
+      // Thêm event listener cho filter
+      filterStatus.addEventListener('change', load);
 
       load();
     </script>
