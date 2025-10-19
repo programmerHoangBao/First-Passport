@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LT Dashboard</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
     <header class="container header">
@@ -29,9 +29,10 @@
           <table>
             <thead>
               <tr>
-                <th>Mã hồ sơ</th>
-                <th>Trạng thái</th>
-                <th>Ngày cập nhật</th>
+                <th>Approval ID</th>
+                <th>Người tạo</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -41,39 +42,113 @@
     </main>
 
     <script type="module">
-      import { apiGet } from '../js/api.js';
-      import { $, showMessage, formatDate } from '../js/utils.js';
-      import { requireRole } from '../js/auth.js';
+      import { apiGet, apiPost } from "../js/api.js";
+      import { $, showMessage, formatDate } from "../js/utils.js";
+      import { requireRole } from "../js/auth.js";
 
-      // chỉ cho phép vai trò LT
-      requireRole('LT');
+      // Chỉ cho phép vai trò LT truy cập
+      requireRole("LT");
 
-      const rows = $('#rows');
-      const msg = $('#msg');
-      const count = $('#count');
+      const rows = $("#rows");
+      const msg = $("#msg");
+      const count = $("#count");
 
-      async function load(){
-        msg.innerHTML = '';
-        rows.innerHTML = '<tr><td colspan="3">Đang tải...</td></tr>';
-        try{
-          const data = await apiGet('/api/passport/approved');
-          count.textContent = String(data?.length || 0);
-          rows.innerHTML = (data||[]).map(it=>`
-            <tr>
-              <td>${it.id ?? ''}</td>
-              <td><span class="badge">${it.status ?? 'APPROVED'}</span></td>
-              <td>${formatDate(it.updatedAt||it.approvedAt)}</td>
-            </tr>
-          `).join('');
-        }catch(err){
-          rows.innerHTML = '';
-          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+      async function load() {
+        msg.innerHTML = "";
+        rows.innerHTML = '<tr><td colspan="4">Đang tải...</td></tr>';
+
+        try {
+          const data = await apiGet("/api/lt/all-request-store");
+          const content = data?.content || data || [];
+          count.textContent = String(content.length || 0);
+
+          if (content.length === 0) {
+            rows.innerHTML =
+              '<tr><td colspan="4" style="text-align:center;">Không có dữ liệu</td></tr>';
+            return;
+          }
+
+          rows.innerHTML = content
+            .map(
+              (it) => `
+                <tr>
+                  <td>${it.approvalId ?? ""}</td>
+                  <td>${it.createdBy ?? ""}</td>
+                  <td>${formatDate(it.createdAt)}</td>
+                  <td>
+                    <button class="success" data-approve="${it.approvalId}">
+                      APPROVED
+                    </button>
+                    <button class="danger" data-reject="${it.approvalId}">
+                      REJECT
+                    </button>
+                  </td>
+                </tr>
+              `
+            )
+            .join("");
+        } catch (err) {
+          rows.innerHTML = "";
+          showMessage(msg, "error", err.message || "Không tải được dữ liệu");
         }
       }
+
+      // Xử lý click cho APPROVE / REJECT
+      rows.addEventListener("click", async (e) => {
+        const approveBtn = e.target.closest("button[data-approve]");
+        const rejectBtn = e.target.closest("button[data-reject]");
+        const currentUserId = 1; // TODO: thay bằng user ID thực tế
+        let approvalId;
+
+        if (approveBtn) {
+          approvalId = approveBtn.getAttribute("data-approve");
+          approveBtn.disabled = true;
+
+          try {
+            await apiPost(
+              `/api/lt/create-passport?approvalId=${approvalId}&userId=${currentUserId}`
+            );
+            showMessage(msg, "success", "Đã lưu dữ liệu thành công!");
+            await load();
+          } catch (err) {
+            showMessage(
+              msg,
+              "error",
+              err.message || "❌ Không thể lưu dữ liệu"
+            );
+          } finally {
+            approveBtn.disabled = false;
+          }
+        }
+
+        if (rejectBtn) {
+          approvalId = rejectBtn.getAttribute("data-reject");
+          rejectBtn.disabled = true;
+
+          if (!confirm("Bạn có chắc muốn từ chối lưu trữ hồ sơ này?")) {
+            rejectBtn.disabled = false;
+            return;
+          }
+
+          try {
+            await apiPost(
+              `/api/lt/reject-passport?approvalId=${approvalId}&userId=${currentUserId}`
+            );
+            showMessage(msg, "success", "Đã từ chối lưu trữ hồ sơ!");
+            await load();
+          } catch (err) {
+            showMessage(
+              msg,
+              "error",
+              err.message || "❌ Không thể từ chối lưu trữ hồ sơ"
+            );
+          } finally {
+            rejectBtn.disabled = false;
+          }
+        }
+      });
 
       load();
     </script>
   </body>
-  </html>
-
-
+</html>

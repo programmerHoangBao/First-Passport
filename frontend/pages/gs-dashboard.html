@@ -86,13 +86,13 @@
           if (response.content && response.content.length > 0) {
             rows.innerHTML = response.content.map(log => `
               <tr>
-                <td>${log.id || ''}</td>
-                <td>${log.actor || ''}</td>
-                <td>${log.role || ''}</td>
-                <td>${log.action || ''}</td>
+                <td>${log.id || 'Unknown'}</td>
+                <td>${log.actor || 'SYSTEM'}</td>
+                <td>${log.role || 'Unknown'}</td>
+                <td>${log.action || 'Unknown'}</td>
                 <td>${formatDate(log.eventTime)}</td>
-                <td>${log.policyName || ''}</td>
-                <td>${log.objectName || ''}</td>
+                <td>${log.policyName || 'Unknown'}</td>
+                <td>${log.objectName || 'Unknown'}</td>
               </tr>
             `).join('');
           } else {
