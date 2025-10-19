@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>XD Dashboard</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
     <header class="container header">
@@ -22,7 +22,7 @@
       <section class="card">
         <div class="toolbar">
           <h2>Danh sách hồ sơ</h2>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center">
             <select id="filter-status">
               <option value="pending">Chờ xét duyệt</option>
               <option value="approved">Đã phê duyệt</option>
@@ -36,10 +36,10 @@
           <table>
             <thead>
               <tr>
-                <th>Mã hồ sơ</th>
-                <th>Họ tên</th>
-                <th>CMND</th>
-                <th>Email</th>
+                <th>Approval Id</th>
+                <th>Form Id</th>
+                <th>Tạo bởi</th>
+                <th>Ngày tạo</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -50,113 +50,134 @@
     </main>
 
     <script type="module">
-      import { apiGet, apiPost } from '../js/api.js';
-      import { $, showMessage } from '../js/utils.js';
-      import { requireRole } from '../js/auth.js';
+      import { apiGet, apiPost } from "../js/api.js";
+      import { $, showMessage } from "../js/utils.js";
+      import { requireRole } from "../js/auth.js";
 
-      // chỉ cho phép vai trò XD
-      requireRole('XD');
+      // Chỉ cho phép vai trò XD
+      requireRole("XD");
 
-      const rows = $('#rows');
-      const msg = $('#msg');
-      const count = $('#count');
-      const filterStatus = $('#filter-status');
+      const rows = $("#rows");
+      const msg = $("#msg");
+      const count = $("#count");
+      const filterStatus = $("#filter-status");
 
-      async function load(){
-        msg.innerHTML = '';
+      // === Hàm tải danh sách hồ sơ ===
+      async function load() {
+        msg.innerHTML = "";
         rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
-        
+
         const selectedFilter = filterStatus.value;
-        
-        try{
+
+        try {
           let data;
-          
-          if (selectedFilter === 'pending') {
+
+          if (selectedFilter === "pending") {
             // Lấy danh sách hồ sơ chưa được xét duyệt
-            data = await apiGet('/api/xd/all-send-from-to-xd?pageNumber=0&pageSize=100');
+            data = await apiGet("/api/xd/all-send-from-to-xd");
           } else {
-            // Lấy danh sách hồ sơ đã được xét duyệt
-            const result = selectedFilter === 'approved' ? 'APPROVED' : 'REJECTED';
-            data = await apiGet(`/api/xd/all-approval-by-result?result=${result}&pageNumber=0&pageSize=100`);
+            // Lấy danh sách hồ sơ đã duyệt
+            const result =
+              selectedFilter === "approved" ? "APPROVED" : "REJECTED";
+            data = await apiGet(
+              `/api/xd/all-approval-by-result?result=${result}&pageNumber=0&pageSize=100`
+            );
           }
-          
-          // Lấy content từ response (vì API trả về Page object)
+
           const content = data?.content || [];
-          count.textContent = String(content?.length || 0);
-          
-          rows.innerHTML = content.map(it=>{
-            const actionButtons = selectedFilter === 'pending' ? `
-              <button class="success" data-approve="${it.id}">Phê duyệt</button>
-              <button class="danger" data-reject="${it.id}">Từ chối</button>
-            ` : `
-              <span class="badge ${selectedFilter === 'approved' ? 'success' : 'danger'}">
-                ${selectedFilter === 'approved' ? 'Đã phê duyệt' : 'Đã từ chối'}
-              </span>
-            `;
-            
-            return `
-              <tr>
-                <td>${it.id ?? ''}</td>
-                <td>${it.fullName ?? ''}</td>
-                <td>${it.identityNumber ?? ''}</td>
-                <td>${it.email ?? ''}</td>
-                <td>${actionButtons}</td>
-              </tr>
-            `;
-          }).join('');
-        }catch(err){
-          rows.innerHTML = '';
-          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+          count.textContent = String(content.length);
+
+          if (content.length === 0) {
+            rows.innerHTML = '<tr><td colspan="5">Không có dữ liệu</td></tr>';
+            return;
+          }
+
+          // Render bảng
+          rows.innerHTML = content
+            .map((it) => {
+              const isPending = selectedFilter === "pending";
+              const statusBadge = isPending
+                ? `
+                  <button class="success" data-approve="${it.approvalId}">Phê duyệt</button>
+                  <button class="danger" data-reject="${it.approvalId}">Từ chối</button>
+                `
+                : `
+                  <span class="badge ${
+                    selectedFilter === "approved" ? "success" : "danger"
+                  }">
+                    ${
+                      selectedFilter === "approved"
+                        ? "Đã phê duyệt"
+                        : "Đã từ chối"
+                    }
+                  </span>
+                `;
+
+              return `
+                <tr>
+                  <td>${it.approvalId ?? ""}</td>
+                  <td>${it.formId ?? ""}</td>
+                  <td>${it.createdBy ?? ""}</td>
+                  <td>${it.createdAt ?? ""}</td>
+                  <td>${statusBadge}</td>
+                </tr>
+              `;
+            })
+            .join("");
+        } catch (err) {
+          rows.innerHTML = "";
+          showMessage(msg, "error", err.message || "Không tải được dữ liệu");
         }
       }
 
-      rows.addEventListener('click', async (e)=>{
-        const approveBtn = e.target.closest('button[data-approve]');
-        const rejectBtn = e.target.closest('button[data-reject]');
-        if(!approveBtn && !rejectBtn) return;
-        
-        const approvalId = (approveBtn||rejectBtn).getAttribute('data-approve') || (approveBtn||rejectBtn).getAttribute('data-reject');
-        const button = (approveBtn||rejectBtn);
+      // === Sự kiện khi click vào nút phê duyệt / từ chối ===
+      rows.addEventListener("click", async (e) => {
+        const approveBtn = e.target.closest("button[data-approve]");
+        const rejectBtn = e.target.closest("button[data-reject]");
+        if (!approveBtn && !rejectBtn) return;
+
+        let approvalId;
+        if (approveBtn) {
+          approvalId = approveBtn.getAttribute("data-approve");
+        } else if (rejectBtn) {
+          approvalId = rejectBtn.getAttribute("data-reject");
+        }
+
+        if (!approvalId) {
+          showMessage(msg, "error", "Không tìm thấy approvalId hợp lệ!");
+          return;
+        }
+
+        const button = approveBtn || rejectBtn;
         button.disabled = true;
-        
-        try{
-          // Lấy thông tin user hiện tại từ token hoặc context
-          // Tạm thời sử dụng ID = 1, cần cải thiện để lấy từ user context thực tế
-          const currentUserId = 1;
-          
+
+        try {
+          const currentUserId = 1; // TODO: thay bằng ID từ token người dùng
+
           if (approveBtn) {
-            await apiPost('/api/xd/approval', {
-              formId: parseInt(approvalId),
-              result: 'APPROVED',
-              approvedAt: new Date().toISOString(),
-              approverBy: currentUserId
-            });
+            await apiPost(
+              `/api/xd/approval?approvalId=${approvalId}&approvalBy=${currentUserId}`
+            );
+          } else if (rejectBtn) {
+            await apiPost(
+              `/api/xd/reject-approval?approvalId=${approvalId}&approverBy=${currentUserId}`
+            );
           }
-          
-          if (rejectBtn) {
-            await apiPost('/api/xd/approval', {
-              formId: parseInt(approvalId),
-              result: 'REJECTED',
-              approvedAt: new Date().toISOString(),
-              approverBy: currentUserId
-            });
-          }
-          
+
           await load();
-          showMessage(msg, 'success', button.textContent + ' thành công!');
-        }catch(err){
-          showMessage(msg, 'error', err.message || 'Thao tác thất bại');
-        }finally{
+          showMessage(msg, "success", button.textContent + " thành công!");
+        } catch (err) {
+          showMessage(msg, "error", err.message || "Thao tác thất bại");
+        } finally {
           button.disabled = false;
         }
       });
 
-      // Thêm event listener cho filter
-      filterStatus.addEventListener('change', load);
+      // === Filter thay đổi thì load lại ===
+      filterStatus.addEventListener("change", load);
 
+      // === Lần đầu load ===
       load();
     </script>
   </body>
-  </html>
-
-
+</html>

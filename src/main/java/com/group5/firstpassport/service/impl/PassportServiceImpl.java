@@ -59,6 +59,9 @@ public class PassportServiceImpl implements IPassportService{
     if (passportSave.getId() == null) {
       throw new BadRequestException(ErrorCode.SAVE_PASSPORT_FAILED);
     }
+    ApprovalEntity approvalEntity = existsApproval.get();
+    approvalEntity.setDeleted(true);
+    approvalRepository.save(approvalEntity);
     return MessageResponse.builder()
                 .messageCode(MessageCode.CREATE_PASSPORT_SUCCESS)
                 .timestamp(LocalDateTime.now())
@@ -69,7 +72,8 @@ public class PassportServiceImpl implements IPassportService{
   @Transactional
   public Page<ViewAllRequestStoreResponse> viewAllRequestStore(int pageNumber, int pageSize) {
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
-    Page<ApprovalEntity> approvals = approvalRepository.findAllByResult(ResultType.APPROVED, pageable);
+    Page<ApprovalEntity> approvals = approvalRepository
+              .findByResultAndIsDeleted(ResultType.APPROVED, false, pageable);
     if (approvals.isEmpty()) {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }
@@ -85,7 +89,8 @@ public class PassportServiceImpl implements IPassportService{
   @Override
   @Transactional
   public MessageResponse rejectPassport(Long approvalId, Long userId) {
-    Optional<ApprovalEntity> existsApproval = approvalRepository.findByIdAndResult(approvalId, ResultType.APPROVED);
+    Optional<ApprovalEntity> existsApproval = approvalRepository
+              .findByIdAndResultAndIsDeleted(approvalId, ResultType.APPROVED, false);
     Optional<UserEntity> existsUser = userRepository.findById(userId);
     if (!existsApproval.isPresent()) {
       throw new BadRequestException(ErrorCode.UNVERIFIED_INFORMATION);

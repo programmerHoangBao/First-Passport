@@ -14,4 +14,6 @@ public interface ApprovalRepository extends JpaRepository<ApprovalEntity, Long> 
   Page<ApprovalEntity> findByResultIsNull(Pageable pageable);
   Optional<ApprovalEntity> findById(Long id);
   Optional<ApprovalEntity> findByIdAndResult(Long id, ResultType result);
+  Optional<ApprovalEntity> findByIdAndResultAndIsDeleted(Long id, ResultType result, boolean isDeleted);
+  Page<ApprovalEntity> findByResultAndIsDeleted(ResultType result, boolean isDeleted, Pageable pageable);
 }

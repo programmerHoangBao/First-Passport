@@ -40,4 +40,7 @@ public class ApprovalEntity {
   @Column(nullable = false)
   @Builder.Default
   private LocalDateTime createdAt = LocalDateTime.now();
+
+  @Builder.Default
+  private boolean isDeleted = false;
 }
