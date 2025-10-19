@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.group5.firstpassport.enums.ResultType;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,9 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class ApprovalResponse {
+  private Long approvalId;
   private Long formId;
   private ResultType result;
-  private LocalDateTime approvedAt = LocalDateTime.now();
-  private Long approverBy;
+  private LocalDateTime approvedAt;
+  private String approverBy;
 }

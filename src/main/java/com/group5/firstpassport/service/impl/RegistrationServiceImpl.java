@@ -17,7 +17,6 @@ import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
 import com.group5.firstpassport.entity.RegistrationEntity;
-import com.group5.firstpassport.entity.ResidentEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
 import com.group5.firstpassport.enums.MessageCode;
@@ -25,7 +24,6 @@ import com.group5.firstpassport.enums.StatusType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
 import com.group5.firstpassport.repository.RegistrationRepository;
-import com.group5.firstpassport.repository.ResidentRepository;
 import com.group5.firstpassport.repository.UserRepository;
 import com.group5.firstpassport.service.IRegistrationService;
 
@@ -39,7 +37,6 @@ import lombok.experimental.FieldDefaults;
 @Slf4j
 public class RegistrationServiceImpl implements IRegistrationService {
   RegistrationRepository registrationRepository;
-  ResidentRepository residentRepository;
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
   ModelMapper modelMapper;

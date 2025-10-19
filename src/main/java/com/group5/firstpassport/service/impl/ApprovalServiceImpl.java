@@ -1,5 +1,6 @@
 package com.group5.firstpassport.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.group5.firstpassport.dto.response.ViewAllSendFromXDResponse;
@@ -10,18 +11,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.group5.firstpassport.dto.request.ApprovalRequest;
 import com.group5.firstpassport.dto.response.ApprovalResponse;
 import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedApprovalResponse;
 import com.group5.firstpassport.entity.ApprovalEntity;
-import com.group5.firstpassport.entity.RegistrationEntity;
 import com.group5.firstpassport.entity.UserEntity;
 import com.group5.firstpassport.enums.ErrorCode;
 import com.group5.firstpassport.enums.ResultType;
 import com.group5.firstpassport.exception.BadRequestException;
 import com.group5.firstpassport.repository.ApprovalRepository;
-import com.group5.firstpassport.repository.RegistrationRepository;
 import com.group5.firstpassport.repository.UserRepository;
 import com.group5.firstpassport.service.IApprovalService;
 
@@ -36,34 +34,41 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class ApprovalServiceImpl implements IApprovalService {
   ApprovalRepository approvalRepository;
-  RegistrationRepository registrationRepository;
   UserRepository userRepository;
   ModelMapper modelMapper;
 
   @Override
-  public ApprovalResponse approval(ApprovalRequest approvalRequest) {
-    Optional<RegistrationEntity> existsRegistration = registrationRepository.findById(approvalRequest.getFormId());
-    Optional<UserEntity> existsUser = userRepository.findById(approvalRequest.getApproverBy());
-    if (existsRegistration.isEmpty()) {
-      throw new BadRequestException(ErrorCode.FORM_REGISTRATION_NOT_FOUND);
+  @Transactional
+  public ApprovalResponse approval(Long approvalId, Long approvalBy) {
+    Optional<ApprovalEntity> existsApproval = approvalRepository.findById(approvalId);
+    Optional<UserEntity> existsUser = userRepository.findById(approvalBy);
+    if (existsApproval.isEmpty()) {
+      throw new BadRequestException(ErrorCode.APPROVAL_NO_EXISTS);
     }
     if (existsUser.isEmpty()) {
       throw new BadRequestException(ErrorCode.USER_NO_EXIST);
     }
-    log.info("User ID = {}", existsUser.get().getId());
-
-    ApprovalEntity approvalInput = modelMapper.map(approvalRequest, ApprovalEntity.class);
-    log.info("Create By = {}", approvalInput.getCreatedBy().getUsername());
-    approvalInput.setRegistration(existsRegistration.get());
+    ApprovalEntity approvalInput = existsApproval.get();
+    approvalInput.setResult(ResultType.APPROVED);
     approvalInput.setApproverBy(existsUser.get());
-    ApprovalEntity approvalSaved = approvalRepository.save(approvalInput);
-    ApprovalResponse approvalResponse = modelMapper.map(approvalSaved, ApprovalResponse.class);
-    approvalResponse.setFormId(approvalSaved.getRegistration().getId());
-    approvalResponse.setApproverBy(approvalSaved.getApproverBy().getId());
-    return approvalResponse;
+    approvalInput.setApprovedAt(LocalDateTime.now());
+    try {
+      ApprovalEntity approvalSave = approvalRepository.save(approvalInput);
+      return ApprovalResponse.builder()
+                        .approvalId(approvalSave.getId())
+                        .formId(approvalSave.getRegistration().getId())
+                        .approverBy(approvalSave.getApproverBy().getUsername())
+                        .approvedAt(approvalSave.getApprovedAt())
+                        .build();
+    }
+    catch (Exception ex){
+      log.error(ex.getMessage());
+      throw new BadRequestException(ErrorCode.APPROVAL_FAILED);
+    }
   }
 
   @Override
+  @Transactional
   public Page<ViewAllApprovalResponse> viewAllApprovalByResult(String resultStr, int pageNumber, int pageSize) {
     ResultType resultType = ResultType.valueOf(resultStr);
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -99,6 +104,7 @@ public class ApprovalServiceImpl implements IApprovalService {
   }
 
   @Override
+  @Transactional
   public ViewDetailedApprovalResponse viewDetailedApproval(Long id) {
     Optional<ApprovalEntity> existsApproval = approvalRepository.findById(id);
     if (!existsApproval.isPresent()) {
