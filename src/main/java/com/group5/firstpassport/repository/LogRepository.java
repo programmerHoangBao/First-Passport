@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LogRepository extends JpaRepository<LogEntity, Long> {
-  Page<LogEntity> findAll(Pageable pageable);
+  Page<LogEntity> findAllByOrderByEventTimeDesc(Pageable pageable);
 }

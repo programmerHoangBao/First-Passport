@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,7 +24,8 @@ public class LogServiceImpl implements ILogService {
 
   @Override
   public Page<ViewAllLogResponse> viewAllLog(int pageNumber, int pageSize) {
-    Page<LogEntity> logs = logRepository.findAll(PageRequest.of(pageNumber, pageSize));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<LogEntity> logs = logRepository.findAllByOrderByEventTimeDesc(pageable);
     if (logs.getTotalElements() == 0) {
       throw new BadRequestException(ErrorCode.NO_DATA);
     }

@@ -24,7 +24,9 @@ public enum MessageCode {
           1002,
           "Reject the passport application request",
           HttpStatus.OK
-  );
+  ),
+  REJECT_APPROVAL_SUCCESS(1003, "Verification request successfully denied!", HttpStatus.OK),
+  CREATE_PASSPORT_SUCCESS(1004, "Save passport successfully.", HttpStatus.CREATED);
 
   private final int responseCode;
   private final String message;

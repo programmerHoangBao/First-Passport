@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ViewAllSendFromXDResponse {
+  private Long approvalId;
   private Long formId;
   private String createdBy;
   private LocalDateTime createdAt;

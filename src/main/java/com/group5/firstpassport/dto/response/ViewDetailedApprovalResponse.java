@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 public class ViewDetailedApprovalResponse {
   Long id;
   private Long formId;
-  private String identityNumber;
   private String fullName;
   private String address;
   private GenderType gender;

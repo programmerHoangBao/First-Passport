@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.group5.firstpassport.dto.response.ApprovalResponse;
+import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.dto.response.ViewAllApprovalResponse;
 import com.group5.firstpassport.dto.response.ViewDetailedApprovalResponse;
 import com.group5.firstpassport.service.impl.ApprovalServiceImpl;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @RestController
@@ -61,5 +64,14 @@ public class ApprovalController {
   @GetMapping("/view-detail-approval")
   public ResponseEntity<ViewDetailedApprovalResponse> viewDetailedApproval(@RequestParam Long id) {
     return ResponseEntity.ok(approvalService.viewDetailedApproval(id));
+  }
+
+  @PutMapping("/reject-approval")
+  public ResponseEntity<MessageResponse> rejectApproval(
+    @RequestParam Long approvalId,
+    @RequestParam Long approverBy
+  ) {
+    MessageResponse message = approvalService.rejectApproval(approvalId, approverBy);
+    return ResponseEntity.status(message.getMessageCode().getHttpStatus()).body(message);
   }
 }
