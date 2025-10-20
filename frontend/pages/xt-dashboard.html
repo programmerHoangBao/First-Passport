@@ -27,12 +27,7 @@
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <a href="view-resident.html" class="secondary" style="text-decoration:none;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);">👤 Xem thông tin cư dân</a>
-            <label class="sr-only" for="status">Trạng thái</label>
-            <select id="status">
-              <option value="PENDING">PENDING</option>
-              <option value="VERIFIED">VERIFIED</option>
-              <option value="REJECTED">REJECTED</option>
-            </select>
+            <span class="badge success">PENDING</span>
             <label class="sr-only" for="pageSize">Kích thước trang</label>
             <select id="pageSize">
               <option value="5">5</option>
@@ -62,6 +57,37 @@
       </section>
     </main>
 
+    <!-- Modal kiểm tra hồ sơ -->
+    <div id="checkModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Kiểm tra hồ sơ</h3>
+          <button id="closeModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modalMsg"></div>
+          
+          <!-- Bảng thông tin đăng ký -->
+          <div class="info-section">
+            <h4>📋 Thông tin đăng ký</h4>
+            <div id="registrationInfo" class="info-table"></div>
+          </div>
+          
+          <!-- Bảng thông tin cư dân -->
+          <div class="info-section">
+            <h4>👤 Thông tin cư dân</h4>
+            <div id="residentInfo" class="info-table"></div>
+          </div>
+          
+          <!-- Nút thao tác -->
+          <div class="modal-actions">
+            <button id="approveBtn" class="success" disabled>Chuyển tiếp</button>
+            <button id="rejectBtn" class="danger" disabled>Từ chối</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script type="module">
       import { apiGet, apiPost } from '../js/api.js';
       import { $, showMessage } from '../js/utils.js';
@@ -73,13 +99,22 @@
       const rows = $('#rows');
       const msg = $('#msg');
       const count = $('#count');
-      const statusSel = $('#status');
       const pageSizeSel = $('#pageSize');
       const prevBtn = $('#prev');
       const nextBtn = $('#next');
       const xtUserSpan = $('#xtUser');
 
-      const state = { status: 'PENDING', pageSize: 10, pageNumber: 0, totalPages: 1 };
+      // Modal elements
+      const checkModal = $('#checkModal');
+      const closeModal = $('#closeModal');
+      const modalMsg = $('#modalMsg');
+      const registrationInfo = $('#registrationInfo');
+      const residentInfo = $('#residentInfo');
+      const approveBtn = $('#approveBtn');
+      const rejectBtn = $('#rejectBtn');
+
+      const state = { pageSize: 10, pageNumber: 0, totalPages: 1 };
+      let currentFormId = null;
 
       function getXtUserId(){
         const v = localStorage.getItem('XT_USER_ID');
@@ -87,11 +122,55 @@
       }
       function setXtUserHint(){ xtUserSpan.textContent = String(getXtUserId()); }
 
+      // Hiển thị thông tin đăng ký
+      function displayRegistrationInfo(registration) {
+        const birthDate = registration.dateOfBirth ? 
+          new Date(registration.dateOfBirth).toLocaleDateString('vi-VN') : 
+          'Không xác định';
+        
+        registrationInfo.innerHTML = `
+          <table class="info-table">
+            <tr><td><strong>Mã hồ sơ:</strong></td><td>${registration.id || 'N/A'}</td></tr>
+            <tr><td><strong>Họ và tên:</strong></td><td>${registration.fullName || 'N/A'}</td></tr>
+            <tr><td><strong>Số CMND/CCCD:</strong></td><td>${registration.identityNumber || 'N/A'}</td></tr>
+            <tr><td><strong>Ngày sinh:</strong></td><td>${birthDate}</td></tr>
+            <tr><td><strong>Email:</strong></td><td>${registration.email || 'N/A'}</td></tr>
+            <tr><td><strong>Số điện thoại:</strong></td><td>${registration.phone || 'N/A'}</td></tr>
+            <tr><td><strong>Địa chỉ:</strong></td><td>${registration.address || 'N/A'}</td></tr>
+            <tr><td><strong>Trạng thái:</strong></td><td><span class="badge warning">${registration.status || 'N/A'}</span></td></tr>
+            <tr><td><strong>Ngày tạo:</strong></td><td>${registration.createdAt ? new Date(registration.createdAt).toLocaleString('vi-VN') : 'N/A'}</td></tr>
+          </table>
+        `;
+      }
+
+      // Hiển thị thông tin cư dân
+      function displayResidentInfo(resident) {
+        const genderText = resident.gender === 'MALE' ? 'Nam' : 
+                          resident.gender === 'FEMALE' ? 'Nữ' : 
+                          resident.gender || 'Không xác định';
+        
+        const birthDate = resident.dateOfBirth ? 
+          new Date(resident.dateOfBirth).toLocaleDateString('vi-VN') : 
+          'Không xác định';
+
+        residentInfo.innerHTML = `
+          <table class="info-table">
+            <tr><td><strong>Số CMND/CCCD:</strong></td><td>${resident.identityNumber || 'N/A'}</td></tr>
+            <tr><td><strong>Họ và tên:</strong></td><td>${resident.fullName || 'N/A'}</td></tr>
+            <tr><td><strong>Ngày sinh:</strong></td><td>${birthDate}</td></tr>
+            <tr><td><strong>Giới tính:</strong></td><td>${genderText}</td></tr>
+            <tr><td><strong>Địa chỉ:</strong></td><td>${resident.address || 'N/A'}</td></tr>
+            <tr><td><strong>Số điện thoại:</strong></td><td>${resident.phone || 'N/A'}</td></tr>
+            <tr><td><strong>Email:</strong></td><td>${resident.email || 'N/A'}</td></tr>
+          </table>
+        `;
+      }
+
       async function load(){
         msg.innerHTML = '';
         rows.innerHTML = '<tr><td colspan="5">Đang tải...</td></tr>';
         try{
-          const query = `?status=${encodeURIComponent(state.status)}&pageSize=${state.pageSize}&pageNumber=${state.pageNumber}`;
+          const query = `?status=PENDING&pageSize=${state.pageSize}&pageNumber=${state.pageNumber}`;
           const page = await apiGet('/api/xt/view-all-registration' + query);
           const list = page?.content || [];
           count.textContent = String(list.length);
@@ -105,7 +184,7 @@
               <td>${it.identityNumber ?? ''}</td>
               <td>${it.email ?? ''}</td>
               <td>
-                <button class="success" data-send="${it.id}">Gửi sang XD</button>
+                <button class="primary" data-check="${it.id}">Kiểm tra</button>
               </td>
             </tr>
           `).join('');
@@ -115,23 +194,100 @@
         }
       }
 
+      // Xử lý click nút Kiểm tra
       rows.addEventListener('click', async (e)=>{
-        const btn = e.target.closest('button[data-send]');
-        if(!btn) return;
-        const id = btn.getAttribute('data-send');
-        btn.disabled = true;
-        try{
-          const xtUserId = getXtUserId();
-          await apiPost(`/api/xt/send-form?formId=${encodeURIComponent(id)}&userId=${encodeURIComponent(xtUserId)}`, {});
-          await load();
-        }catch(err){
-          showMessage(msg, 'error', err.message || 'Thao tác thất bại');
-        }finally{
-          btn.disabled = false;
+        const checkBtn = e.target.closest('button[data-check]');
+        if(!checkBtn) return;
+        
+        const formId = checkBtn.getAttribute('data-check');
+        currentFormId = formId;
+        
+        // Hiển thị modal
+        checkModal.style.display = 'block';
+        modalMsg.innerHTML = '';
+        registrationInfo.innerHTML = '<div class="loading">Đang tải thông tin đăng ký...</div>';
+        residentInfo.innerHTML = '<div class="loading">Đang tải thông tin cư dân...</div>';
+        approveBtn.disabled = true;
+        rejectBtn.disabled = true;
+        
+        try {
+          // Lấy thông tin đăng ký
+          const registrationDetail = await apiGet(`/api/xt/view-detail-registration?id=${formId}`);
+          displayRegistrationInfo(registrationDetail);
+          
+          // Lấy thông tin cư dân
+          const identityNumber = registrationDetail.identityNumber;
+          if (identityNumber) {
+            const residentDetail = await apiGet(`/api/xt/view-detail-resident?identityNumber=${identityNumber}`);
+            displayResidentInfo(residentDetail);
+          } else {
+            residentInfo.innerHTML = '<div class="error">Không tìm thấy số CMND/CCCD</div>';
+          }
+          
+          // Enable buttons
+          approveBtn.disabled = false;
+          rejectBtn.disabled = false;
+          
+        } catch (err) {
+          modalMsg.innerHTML = `<div class="error">Lỗi: ${err.message || 'Không thể tải thông tin'}</div>`;
+          registrationInfo.innerHTML = '';
+          residentInfo.innerHTML = '';
         }
       });
 
-      statusSel.addEventListener('change', ()=>{ state.status = statusSel.value; state.pageNumber = 0; load(); });
+      // Xử lý nút Chuyển tiếp
+      approveBtn.addEventListener('click', async () => {
+        if (!currentFormId) return;
+        
+        approveBtn.disabled = true;
+        try {
+          const xtUserId = getXtUserId();
+          await apiPost(`/api/xt/send-form?formId=${currentFormId}&userId=${xtUserId}`, {});
+          showMessage(modalMsg, 'success', 'Đã chuyển tiếp hồ sơ thành công!');
+          setTimeout(() => {
+            checkModal.style.display = 'none';
+            load(); // Reload danh sách
+          }, 1500);
+        } catch (err) {
+          showMessage(modalMsg, 'error', err.message || 'Không thể chuyển tiếp hồ sơ');
+        } finally {
+          approveBtn.disabled = false;
+        }
+      });
+
+      // Xử lý nút Từ chối
+      rejectBtn.addEventListener('click', async () => {
+        if (!currentFormId) return;
+        
+        if (!confirm('Bạn có chắc muốn từ chối hồ sơ này?')) return;
+        
+        rejectBtn.disabled = true;
+        try {
+          await apiPost(`/api/xt/reject-form?formId=${currentFormId}`, {});
+          showMessage(modalMsg, 'success', 'Đã từ chối hồ sơ thành công!');
+          setTimeout(() => {
+            checkModal.style.display = 'none';
+            load(); // Reload danh sách
+          }, 1500);
+        } catch (err) {
+          showMessage(modalMsg, 'error', err.message || 'Không thể từ chối hồ sơ');
+        } finally {
+          rejectBtn.disabled = false;
+        }
+      });
+
+      // Đóng modal
+      closeModal.addEventListener('click', () => {
+        checkModal.style.display = 'none';
+      });
+
+      // Đóng modal khi click outside
+      checkModal.addEventListener('click', (e) => {
+        if (e.target === checkModal) {
+          checkModal.style.display = 'none';
+        }
+      });
+
       pageSizeSel.addEventListener('change', ()=>{ state.pageSize = Number(pageSizeSel.value); state.pageNumber = 0; load(); });
       prevBtn.addEventListener('click', ()=>{ if(state.pageNumber>0){ state.pageNumber--; load(); }});
       nextBtn.addEventListener('click', ()=>{ if(state.pageNumber < state.totalPages-1){ state.pageNumber++; load(); }});
@@ -140,6 +296,161 @@
       setXtUserHint();
       load();
     </script>
+
+    <style>
+      /* Modal styles */
+      .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        overflow-y: auto;
+      }
+
+      .modal-content {
+        background-color: var(--bg);
+        margin: 2% auto;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 1000px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-secondary);
+        border-radius: 12px 12px 0 0;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        color: var(--text);
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text);
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+      }
+
+      .close-btn:hover {
+        background-color: var(--border);
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .info-section {
+        margin-bottom: 30px;
+      }
+
+      .info-section h4 {
+        margin: 0 0 15px 0;
+        color: var(--text);
+        font-size: 16px;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 8px;
+      }
+
+      .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg);
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      .info-table tr:nth-child(even) {
+        background-color: var(--bg-secondary);
+      }
+
+      .info-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .info-table td:first-child {
+        width: 200px;
+        background-color: var(--bg-secondary);
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .info-table td:last-child {
+        color: var(--text-secondary);
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+
+      .modal-actions button {
+        min-width: 120px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+
+      .error {
+        color: var(--danger);
+        background: var(--danger-bg);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--danger);
+        margin: 10px 0;
+      }
+
+      .success {
+        color: var(--success);
+        background: var(--success-bg);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--success);
+        margin: 10px 0;
+      }
+
+      .badge.warning {
+        background-color: #f59e0b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    </style>
   </body>
   </html>
 

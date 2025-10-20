@@ -17,6 +17,7 @@ export function saveAuth(resp){
 	// Lưu accessToken từ response
 	const token = resp?.accessToken || null;
 	if (token) {
+		localStorage.setItem('userId', resp.userId);
 		localStorage.setItem('accessToken', token);
 		localStorage.setItem('refreshToken', resp.refreshToken);
 	}
