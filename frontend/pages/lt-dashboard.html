@@ -42,7 +42,7 @@
     </main>
 
     <script type="module">
-      import { apiGet, apiPost } from "../js/api.js";
+      import { apiGet, apiPost, apiPut } from "../js/api.js";
       import { $, showMessage, formatDate } from "../js/utils.js";
       import { requireRole } from "../js/auth.js";
 
@@ -89,7 +89,13 @@
             .join("");
         } catch (err) {
           rows.innerHTML = "";
-          showMessage(msg, "error", err.message || "Không tải được dữ liệu");
+          // Kiểm tra nếu là lỗi No data
+          if (err.message && err.message.includes('No data')) {
+            rows.innerHTML = '<tr><td colspan="4" style="text-align:center;">Hiện tại không có dữ liệu</td></tr>';
+            count.textContent = '0';
+          } else {
+            showMessage(msg, "error", err.message || "Không tải được dữ liệu");
+          }
         }
       }
 
@@ -131,7 +137,7 @@
           }
 
           try {
-            await apiPost(
+            await apiPut(
               `/api/lt/reject-passport?approvalId=${approvalId}&userId=${currentUserId}`
             );
             showMessage(msg, "success", "Đã từ chối lưu trữ hồ sơ!");
