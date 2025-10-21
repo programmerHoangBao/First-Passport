@@ -100,7 +100,12 @@
           }
         }catch(err){
           rows.innerHTML = '';
-          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+          // Kiểm tra nếu là lỗi No data
+          if (err.message && err.message.includes('No data')) {
+            rows.innerHTML = '<tr><td colspan="7" style="text-align:center;">Hiện tại không có dữ liệu</td></tr>';
+          } else {
+            showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+          }
         }
       }
 

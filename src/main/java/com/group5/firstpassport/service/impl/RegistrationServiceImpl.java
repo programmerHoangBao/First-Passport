@@ -6,9 +6,13 @@ import java.util.Optional;
 import com.group5.firstpassport.dto.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.request.RegistrationRequest;
@@ -27,6 +31,8 @@ import com.group5.firstpassport.service.IRegistrationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.eclipse.angus.mail.smtp.SMTPSendFailedException;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +43,10 @@ public class RegistrationServiceImpl implements IRegistrationService {
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
   ModelMapper modelMapper;
+  JavaMailSender mailSender;
+  @Value("${spring.mail.username}")
+  @NonFinal
+  private String fromEmail;
   
   @Override
   public RegistrationResponse registration(RegistrationRequest registrationRequest) {
@@ -123,9 +133,35 @@ public class RegistrationServiceImpl implements IRegistrationService {
     if (registrationRepository.save(updateForm).getId() == null) {
       throw new BadRequestException(ErrorCode.REJECT_FORM_FAILED);
     }
+    
+    // Gửi email thông báo từ chối
+    String email = updateForm.getEmail();
+    String body = "Hồ sơ đăng ký passport của bạn đã bị từ chối. Vui lòng liên hệ để biết thêm thông tin chi tiết.";
+    sendEmail(email, body);
+    
     return MessageResponse.builder()
                   .messageCode(MessageCode.REJECT_FORM_REGISTRATION_SUCCESS)
                   .timestamp(LocalDateTime.now())
                   .build();
+  }
+
+  private void sendEmail(String email, String body) {
+    try {
+      SimpleMailMessage message = new SimpleMailMessage();
+      message.setFrom(fromEmail);
+      message.setTo(email);
+      message.setSubject("Thông báo kết quả đăng ký passport");
+      message.setText(body);
+      mailSender.send(message);
+    }
+    catch (MailException ex) {
+      Throwable rootCause = ex.getCause();
+      if (rootCause instanceof SMTPSendFailedException) {
+        log.error("SMTP failed to send email: {}", rootCause.getMessage());
+      } else {
+        log.error("General mail exception: {}", ex.getMessage());
+      }
+      throw new BadRequestException(ErrorCode.EMAIL_SENDING_FAILED);
+    }
   }
 }

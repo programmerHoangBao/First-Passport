@@ -81,7 +81,7 @@
           
           <!-- Nút thao tác -->
           <div class="modal-actions">
-            <button id="approveBtn" class="success" disabled>Chuyển tiếp</button>
+            <button id="approveBtn" class="success" disabled>Chuyển Tiếp</button>
             <button id="rejectBtn" class="danger" disabled>Từ chối</button>
           </div>
         </div>
@@ -89,7 +89,7 @@
     </div>
 
     <script type="module">
-      import { apiGet, apiPost } from '../js/api.js';
+      import { apiGet, apiPost, apiPut } from '../js/api.js';
       import { $, showMessage } from '../js/utils.js';
       import { requireRole } from '../js/auth.js';
 
@@ -190,7 +190,13 @@
           `).join('');
         }catch(err){
           rows.innerHTML = '';
-          showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+          // Kiểm tra nếu là lỗi No data
+          if (err.message && err.message.includes('No data')) {
+            rows.innerHTML = '<tr><td colspan="5" style="text-align:center;">Hiện tại không có dữ liệu</td></tr>';
+            count.textContent = '0';
+          } else {
+            showMessage(msg, 'error', err.message || 'Không tải được dữ liệu');
+          }
         }
       }
 
@@ -263,7 +269,7 @@
         
         rejectBtn.disabled = true;
         try {
-          await apiPost(`/api/xt/reject-form?formId=${currentFormId}`, {});
+          await apiPut(`/api/xt/reject-form?formId=${currentFormId}`, {});
           showMessage(modalMsg, 'success', 'Đã từ chối hồ sơ thành công!');
           setTimeout(() => {
             checkModal.style.display = 'none';

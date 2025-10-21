@@ -5,9 +5,13 @@ import java.util.Optional;
 
 import com.group5.firstpassport.dto.response.ViewAllSendFromXDResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.group5.firstpassport.dto.response.ApprovalResponse;
@@ -27,7 +31,9 @@ import com.group5.firstpassport.service.IApprovalService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.transaction.annotation.Transactional;
+import org.eclipse.angus.mail.smtp.SMTPSendFailedException;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -36,6 +42,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApprovalServiceImpl implements IApprovalService {
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
+  JavaMailSender mailSender;
+  @Value("${spring.mail.username}")
+  @NonFinal
+  private String fromEmail;
 
   @Override
   @Transactional
@@ -145,6 +155,12 @@ public class ApprovalServiceImpl implements IApprovalService {
     approvalInput.setApprovedAt(LocalDateTime.now());
     try {
       approvalRepository.save(approvalInput);
+      
+      // Gửi email thông báo từ chối
+      String email = approvalInput.getRegistration().getEmail();
+      String body = "Hồ sơ đăng ký passport của bạn đã bị từ chối. Vui lòng liên hệ để biết thêm thông tin chi tiết.";
+      sendEmail(email, body);
+      
       return MessageResponse.builder()
                 .messageCode(MessageCode.REJECT_APPROVAL_SUCCESS)
                 .timestamp(LocalDateTime.now())
@@ -153,6 +169,26 @@ public class ApprovalServiceImpl implements IApprovalService {
     catch (Exception ex) {
       log.error(ex.getMessage());
       throw new BadRequestException(ErrorCode.REJECT_APPROVAL_FAILED);
+    }
+  }
+
+  private void sendEmail(String email, String body) {
+    try {
+      SimpleMailMessage message = new SimpleMailMessage();
+      message.setFrom(fromEmail);
+      message.setTo(email);
+      message.setSubject("Thông báo kết quả đăng ký passport");
+      message.setText(body);
+      mailSender.send(message);
+    }
+    catch (MailException ex) {
+      Throwable rootCause = ex.getCause();
+      if (rootCause instanceof SMTPSendFailedException) {
+        log.error("SMTP failed to send email: {}", rootCause.getMessage());
+      } else {
+        log.error("General mail exception: {}", ex.getMessage());
+      }
+      throw new BadRequestException(ErrorCode.EMAIL_SENDING_FAILED);
     }
   }
 }
