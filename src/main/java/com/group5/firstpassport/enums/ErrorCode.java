@@ -34,6 +34,7 @@ public enum ErrorCode {
   REJECT_REQUEST_STORE_FAILED(1118, "The request to deny passport creation failed.", HttpStatus.BAD_REQUEST),
   APPROVAL_FAILED(1119, "Passport registration information verification failed!", HttpStatus.BAD_REQUEST),
   REJECT_APPROVAL_FAILED(1120, "Failed to deny the verification request.", HttpStatus.BAD_REQUEST),
+  EMAIL_SENDING_FAILED(900, "Failed to send email. Please try again later.", HttpStatus.BAD_REQUEST),
   OTHER_EXCEPTIONS(1999, "System error has occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final int responseCode;

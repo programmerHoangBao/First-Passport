@@ -1,15 +1,24 @@
 package com.group5.firstpassport.service.impl;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.group5.firstpassport.dto.response.MessageResponse;
 import com.group5.firstpassport.enums.MessageCode;
+import com.group5.firstpassport.repository.RegistrationRepository;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
+import org.eclipse.angus.mail.smtp.SMTPSendFailedException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +43,14 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @Slf4j
 public class PassportServiceImpl implements IPassportService{
-
+  JdbcTemplate jdbcTemplate;
+  JavaMailSender mailSender;
   PassportRepository passportRepository;
   ApprovalRepository approvalRepository;
   UserRepository userRepository;
+  @Value("${spring.mail.username}")
+  @NonFinal
+  private String fromEmail;
 
   @Override
   @Transactional
@@ -62,6 +75,17 @@ public class PassportServiceImpl implements IPassportService{
     ApprovalEntity approvalEntity = existsApproval.get();
     approvalEntity.setDeleted(true);
     approvalRepository.save(approvalEntity);
+    jdbcTemplate.execute((Connection conn) -> {
+      try (CallableStatement cs = conn.prepareCall("{call set_passport_ctx_pkg.set_user_info(?, ?)}")) {
+        cs.setString(1, "SYSTEM");
+        cs.setString(2, "XD");
+        cs.execute();
+      }
+      return null;
+    });
+    String email = approvalEntity.getRegistration().getEmail();
+    String body = "Đăng Ký Thành Công";
+    sendEmail(email, body);
     return MessageResponse.builder()
                 .messageCode(MessageCode.CREATE_PASSPORT_SUCCESS)
                 .timestamp(LocalDateTime.now())
@@ -108,6 +132,26 @@ public class PassportServiceImpl implements IPassportService{
     catch (Exception e) {
       log.error(e.getMessage());
       throw new BadRequestException(ErrorCode.REJECT_REQUEST_STORE_FAILED);
+    }
+  }
+
+  private void sendEmail(String email,String body) {
+    try {
+      SimpleMailMessage message = new SimpleMailMessage();
+      message.setFrom(fromEmail);
+      message.setTo(email);
+      message.setSubject("Thông báo kết quả đăng ký passport : ");
+      message.setText(body);
+      mailSender.send(message);
+    }
+    catch (MailException ex) {
+      Throwable rootCause = ex.getCause();
+    if (rootCause instanceof SMTPSendFailedException) {
+      log.error("SMTP failed to send email: {}", rootCause.getMessage());
+    } else {
+      log.error("General mail exception: {}", ex.getMessage());
+    }
+      throw new BadRequestException(ErrorCode.EMAIL_SENDING_FAILED);
     }
   }
 }

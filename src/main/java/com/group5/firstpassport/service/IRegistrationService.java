@@ -1,12 +1,9 @@
 package com.group5.firstpassport.service;
 
+import com.group5.firstpassport.dto.response.*;
 import org.springframework.data.domain.Page;
 
 import com.group5.firstpassport.dto.request.RegistrationRequest;
-import com.group5.firstpassport.dto.response.MessageResponse;
-import com.group5.firstpassport.dto.response.RegistrationResponse;
-import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
-import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 
 public interface IRegistrationService {
   RegistrationResponse registration(RegistrationRequest registrationRequest);
@@ -14,4 +11,5 @@ public interface IRegistrationService {
   ViewDetailedRegistrationResponse findDetailed(Long id);
   MessageResponse sendFromToXD(Long formId, Long userId);
   MessageResponse rejectForm(Long formId);
+
 }

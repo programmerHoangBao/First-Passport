@@ -1,5 +1,6 @@
 package com.group5.firstpassport.controller;
 
+import com.group5.firstpassport.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -12,10 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.group5.firstpassport.dto.request.RegistrationRequest;
-import com.group5.firstpassport.dto.response.MessageResponse;
-import com.group5.firstpassport.dto.response.RegistrationResponse;
-import com.group5.firstpassport.dto.response.ViewAllRegistrationResponse;
-import com.group5.firstpassport.dto.response.ViewDetailedRegistrationResponse;
 import com.group5.firstpassport.service.impl.RegistrationServiceImpl;
 
 import jakarta.validation.Valid;
