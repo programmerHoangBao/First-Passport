@@ -1,4 +1,6 @@
-1. Tổng quan – Hệ thống Cấp Hộ Chiếu Lần Đầu
+DỰ ÁN FIRST-PASSPORT BACK-END
+CSDL: ORACLE
+**1. Tổng quan – Hệ thống Cấp Hộ Chiếu Lần Đầu**
 - Hệ thống Cấp Hộ Chiếu Lần Đầu được thiết kế nhằm hỗ trợ người dân đăng ký và theo dõi quá trình cấp hộ chiếu trực tuyến, đảm bảo tính chính xác, minh bạch và bảo mật dữ liệu cá nhân.
 - Người sử dụng sẽ điền thông tin đăng ký (bao gồm: Họ và tên, địa chỉ thường trú, phái, CMND, điện thoại, email) thông qua form online, dữ liệu này được chuyển đến các bộ phận chức năng xử lý theo quy trình sau:
 
@@ -24,10 +26,10 @@
   + EMAIL	(Địa chỉ email của ứng dụng)	Địa chỉ Gmail dùng để gửi các email tự động đến người dùng (ví dụ: passport.service@gmail.com).
   + APP_PASSWORD	(Mật khẩu ứng dụng (App Password)):	Mật khẩu đặc biệt do Gmail cấp để các ứng dụng có thể gửi email qua SMTP. Không phải mật khẩu Gmail thật, được tạo trong Google Account → Security → App passwords.
 - Chạy dự án.
-3. Kết quả thực hiện:
-Test từng API
-  - API api/register
-    + API này dùng để đăng kí cấp hộ chiếu lần đầu
+**3. Kết quả thực hiện:
+**Test từng API
+**  - API api/register
+**    + API này dùng để đăng kí cấp hộ chiếu lần đầu
     + Role thực hiện: người dùng muốn đăng kí cấp hộ chiếu lần đầu
 <img width="1919" height="1123" alt="image" src="https://github.com/user-attachments/assets/ac028662-b3b7-4167-a1fd-a3887fb9b60e" />
 
