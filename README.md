@@ -1,4 +1,4 @@
-PROJECT: FIRST-PASSPORT BACK-END
+**PROJECT: FIRST-PASSPORT BACK-END**
 Database: ORACLE
 
 **1. Overview – First-Time Passport Issuance System**
@@ -14,27 +14,69 @@ Database: ORACLE
 - **Supervision Department (GS):** Monitors the entire operational process of the **Verification (XT)**, **Approval (XD)**, and **Archiving (LT)** departments from the time the user submits the application until the final result is issued → Ensures transparency, detects and controls potential violations, and enables traceability when necessary.
 
 
-2. Cài đặt:
-- Clone dự án về máy: -git clone https://github.com/programmerHoangBao/First-Passport.git
-- Chạy file file script trong Oracle "First-Passport/src/main/scripts/Create_Group5_user.sql" với tài khoản SYSTEM trong service ORCLPDB.
-- Tạo file .env trong thư mục First-Passport (mô tả từng thuộc tính trong .env)
-  + SERVER_PORT (Cổng chạy ứng dụng):	Ứng dụng backend (thường là Spring Boot) sẽ khởi động trên cổng 7070. Khi chạy, bạn truy cập qua http://localhost:7070.
-  + ORACLE_DB_URL	(Đường dẫn kết nối đến Oracle Database): Cấu trúc jdbc:oracle:thin:@//localhost:1521/ORCLPDB cho biết ứng dụng sẽ kết nối đến Oracle PDB (Pluggable Database) tên ORCLPDB đang chạy trên localhost qua port 1521.
-  + ORACLE_DB_USERNAME (Tên người dùng cơ sở dữ liệu):	Tên user trong Oracle được cấp quyền truy cập (ở đây là GROUP5_USER) — thường tương ứng với schema chứa các bảng dữ liệu của ứng dụng.
-  + ORACLE_DB_PASSWORD	(Mật khẩu cơ sở dữ liệu):	Mật khẩu để xác thực user GROUP5_USER khi kết nối tới Oracle Database.
-  + SECRET_KEY	Khóa bí mật (JWT Secret Key)	Dùng để mã hóa và xác thực token JWT trong hệ thống đăng nhập. Đây là chuỗi ngẫu nhiên cần được giữ bí mật tuyệt đối, không chia sẻ công khai.
-  + TOKEN_EXPIRATION_MS	Thời gian hết hạn của Access Token (JWT)	Đơn vị mili-giây (ms) — ở đây là 1800000 ms tương đương 30 phút. Sau thời gian này, người dùng phải lấy token mới để tiếp tục truy cập.
-  + REFRESH_EXPIRATION_MS	(Thời gian hết hạn của Refresh Token)	Cũng tính bằng mili-giây — 604800000 ms tương đương 7 ngày. Dùng để lấy Access Token mới mà không cần đăng nhập lại.
-  + HOST	(Máy chủ gửi email)	Máy chủ SMTP (ở đây là smtp.gmail.com) dùng để gửi email xác thực, thông báo, hoặc đặt lại mật khẩu.
-  + PORT	(Cổng SMTP)	Cổng 587 được dùng cho kết nối SMTP qua TLS (bảo mật).
-  + EMAIL	(Địa chỉ email của ứng dụng)	Địa chỉ Gmail dùng để gửi các email tự động đến người dùng (ví dụ: passport.service@gmail.com).
-  + APP_PASSWORD	(Mật khẩu ứng dụng (App Password)):	Mật khẩu đặc biệt do Gmail cấp để các ứng dụng có thể gửi email qua SMTP. Không phải mật khẩu Gmail thật, được tạo trong Google Account → Security → App passwords.
-- Chạy dự án.
-**3. Kết quả thực hiện:
-**Test từng API
-**  - API api/register
-**    + API này dùng để đăng kí cấp hộ chiếu lần đầu
-    + Role thực hiện: người dùng muốn đăng kí cấp hộ chiếu lần đầu
+**2. Installation:**
+
+* Clone the project to your local machine:
+
+  ```bash
+  git clone https://github.com/programmerHoangBao/First-Passport.git
+  ```
+
+* Run the SQL script file in Oracle:
+  `First-Passport/src/main/scripts/Create_Group5_user.sql` using the **SYSTEM** account within the **ORCLPDB** service.
+
+* Create a `.env` file in the **First-Passport** directory (description of each property below):
+
+  * **SERVER_PORT** *(Application Port)*:
+    The backend application (typically a Spring Boot app) will run on port **7070**.
+    Access it via: [http://localhost:7070](http://localhost:7070).
+
+  * **ORACLE_DB_URL** *(Oracle Database Connection URL)*:
+    Format `jdbc:oracle:thin:@//localhost:1521/ORCLPDB` indicates the app connects to an Oracle **Pluggable Database (PDB)** named **ORCLPDB** running on **localhost** through port **1521**.
+
+  * **ORACLE_DB_USERNAME** *(Database Username)*:
+    The Oracle user with granted access (in this case **GROUP5_USER**) — usually corresponding to the schema that holds the application's data tables.
+
+  * **ORACLE_DB_PASSWORD** *(Database Password)*:
+    The password used to authenticate **GROUP5_USER** when connecting to the Oracle Database.
+
+  * **SECRET_KEY** *(JWT Secret Key)*:
+    A secret string used to sign and verify JWT tokens in the authentication system.
+    It must be kept **strictly confidential** and never shared publicly.
+
+  * **TOKEN_EXPIRATION_MS** *(Access Token Expiration Time)*:
+    Expressed in milliseconds — **1800000 ms** equals **30 minutes**.
+    After this period, users must request a new access token to continue.
+
+  * **REFRESH_EXPIRATION_MS** *(Refresh Token Expiration Time)*:
+    Also in milliseconds — **604800000 ms** equals **7 days**.
+    Used to obtain a new access token without re-logging in.
+
+  * **HOST** *(Email Host)*:
+    SMTP server (e.g., **smtp.gmail.com**) used for sending verification, notification, or password reset emails.
+
+  * **PORT** *(SMTP Port)*:
+    Port **587** is used for SMTP connections over **TLS** (secure transmission).
+
+  * **EMAIL** *(Application Email Address)*:
+    The Gmail address used by the system to send automated emails to users
+    (e.g., **[passport.service@gmail.com](mailto:passport.service@gmail.com)**).
+
+  * **APP_PASSWORD** *(App Password)*:
+    A special password issued by Gmail for applications to send emails via SMTP.
+    It is **not** your regular Gmail password and can be created via
+    *Google Account → Security → App passwords*.
+
+* Finally, **run the project**.
+
+**3. Implementation Results:**
+**API Testing**
+
+* **API:** `api/register`
+
+  * **Purpose:** Used for first-time passport registration.
+  * **Role:** Executed by users who want to apply for their first passport.
+
 <img width="1919" height="1123" alt="image" src="https://github.com/user-attachments/assets/ac028662-b3b7-4167-a1fd-a3887fb9b60e" />
 
   - API api/login
