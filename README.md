@@ -27,7 +27,13 @@
 3. Kết quả thực hiện:
 Test từng API
   - API {{firstpassport}}/register
-    + API này dùng để đăng kí
-    + Role: người dùng
+    + API này dùng để đăng kí cấp hộ chiếu lần đầu
+    + Role thực hiện: người dùng muốn đăng kí cấp hộ chiếu lần đầu
 <img width="1919" height="1123" alt="image" src="https://github.com/user-attachments/assets/ac028662-b3b7-4167-a1fd-a3887fb9b60e" />
 
+  - API {{firstpassport}}/login
+    + API này dành cho người dùng đã có tải khoản đăng nhập vào hệ thống
+    + Role thực hiện: người dùng đã có tài khoản (XT, XD, LT, GS)
+<img width="1919" height="1132" alt="image" src="https://github.com/user-attachments/assets/535e16f8-88f8-4bc1-ad04-657ab427dd44" />
+
+  - API 
