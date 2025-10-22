@@ -1,14 +1,18 @@
-DỰ ÁN FIRST-PASSPORT BACK-END
-CSDL: ORACLE
-**1. Tổng quan – Hệ thống Cấp Hộ Chiếu Lần Đầu**
-- Hệ thống Cấp Hộ Chiếu Lần Đầu được thiết kế nhằm hỗ trợ người dân đăng ký và theo dõi quá trình cấp hộ chiếu trực tuyến, đảm bảo tính chính xác, minh bạch và bảo mật dữ liệu cá nhân.
-- Người sử dụng sẽ điền thông tin đăng ký (bao gồm: Họ và tên, địa chỉ thường trú, phái, CMND, điện thoại, email) thông qua form online, dữ liệu này được chuyển đến các bộ phận chức năng xử lý theo quy trình sau:
+PROJECT: FIRST-PASSPORT BACK-END
+Database: ORACLE
 
-🔹 Quy trình xử lý
-- Bộ phận Xác thực (XT): Tiếp nhận thông tin từ form đăng ký -> Đối chiếu dữ liệu người đăng ký với Resident Database (chứa thông tin công dân như CMND, hộ khẩu,...) -> Sau khi xác thực, gửi yêu cầu hợp lệ cho bộ phận Xét duyệt (XD).
-- Bộ phận Xét duyệt (XD): Xem xét các thông tin trên form đăng ký -> Không có quyền truy cập dữ liệu trong Resident Database -> Phê duyệt hoặc từ chối yêu cầu cấp hộ chiếu.
-- Bộ phận Lưu trữ (LT): Nhận kết quả phê duyệt từ bộ phận XD -> Lưu trữ trạng thái kết quả (đồng ý / không đồng ý cấp hộ chiếu) -> Không được truy cập thông tin cá nhân hoặc dữ liệu khác.
-- Bộ phận Giám sát (GS): Theo dõi toàn bộ quy trình hoạt động của các bộ phận XT, XD, LT từ khi người dùng nộp đơn đến khi nhận kết quả. -> Đảm bảo tính minh bạch, kiểm soát sai phạm và truy vết khi cần thiết.
+**1. Overview – First-Time Passport Issuance System**
+- The First-Time Passport Issuance System is designed to assist citizens in registering and tracking the passport issuance process online, ensuring accuracy, transparency, and the security of personal data.
+- Users fill in registration information (including full name, permanent address, gender, ID number, phone number, and email) through an online form. This data is then transferred to the respective functional departments for processing according to the following workflow:
+
+🔹 **Processing Workflow**
+- **Verification Department (XT):** Receives information from the registration form → Cross-checks applicant data with the **Resident Database** (which contains citizen information such as ID number, household registration, etc.) → After successful verification, forwards valid requests to the **Approval Department (XD)** for further processing.
+
+- **Approval Department (XD):** Reviews the information provided in the registration form → Does **not** have access to data in the **Resident Database** → Approves or rejects the passport issuance request.
+- **Archiving Department (LT):** Receives the approval results from the **Approval Department (XD)** → Stores the status of the outcome (approved/rejected for passport issuance) → Does **not** have access to personal information or any other data.
+
+- **Supervision Department (GS):** Monitors the entire operational process of the **Verification (XT)**, **Approval (XD)**, and **Archiving (LT)** departments from the time the user submits the application until the final result is issued → Ensures transparency, detects and controls potential violations, and enables traceability when necessary.
+
 
 2. Cài đặt:
 - Clone dự án về máy: -git clone https://github.com/programmerHoangBao/First-Passport.git
