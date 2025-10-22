@@ -26,14 +26,82 @@
 - Chạy dự án.
 3. Kết quả thực hiện:
 Test từng API
-  - API {{firstpassport}}/register
+  - API api/register
     + API này dùng để đăng kí cấp hộ chiếu lần đầu
     + Role thực hiện: người dùng muốn đăng kí cấp hộ chiếu lần đầu
 <img width="1919" height="1123" alt="image" src="https://github.com/user-attachments/assets/ac028662-b3b7-4167-a1fd-a3887fb9b60e" />
 
-  - API {{firstpassport}}/login
+  - API api/login
     + API này dành cho người dùng đã có tải khoản đăng nhập vào hệ thống
     + Role thực hiện: người dùng đã có tài khoản (XT, XD, LT, GS)
 <img width="1919" height="1132" alt="image" src="https://github.com/user-attachments/assets/535e16f8-88f8-4bc1-ad04-657ab427dd44" />
 
-  - API 
+  - API api/xt/view-all-registration
+    + Request: là Params, Key = status, Value = PENDING, VERIFIED, REJECTED.
+    + API này dùng để xem tất cả những yêu cầu đăng kí cấp hộ chiếu
+    + Role thực hiện: XT
+
+  - API xt/view-detail-registration
+    + Request: là Params, Key là Long id
+    + API này dùng để xem chi tiết thông tin yêu cầu đăng kí cấp hộ chiếu.
+    + Role thực hiện: XT
+   
+  - API api/xt/send-form
+    + Request: là Params, Key Long formId và Long userId
+    + API này dùng để gửi yêu cầu đăng kí cấp hộ chiếu đến bộ phận XD
+    + Role thực hiện: XT
+   
+  - API api/xt/reject-form
+    + Request: là Params, Key Long formId
+    + API này dùng để gửi từ chối yêu cầu đăng kí cấp hộ chiếu 
+    + Role thực hiện: XT
+
+  - API api/xt/view-detail-resident
+    + Request: là Params, Key String identityNumber, message = "Identity Number must contain 12 digits"
+    + API này dùng để xem chi tiết thông tin dân cư
+    + Role thực hiện: XT
+
+  - API api/xd/approval
+    + Request: là Params, Key Long approvalId, Long approvalBy
+    + API này dùng để chấp nhận yêu cầu đăng kí hộ chiếu từ bộ phận XT gửi đến
+    + Role thực hiện: XD
+
+  - API api/xd/all-approval-by-result
+    + Request: là Params, Key int pageNumber và int pageSize
+    + API này dùng để hiển thị danh sách approval theo kết quả
+    + Role thực hiện: XD
+
+  - API api/xd/all-send-from-to-xd
+    + Request: là Params, Key int pageNumber và int pageSize
+    + API này dùng để hiển thị tất cả cách form registration đã được xác thực
+    + Role thực hiện: XD
+   
+  - API api/xd/view-detail-approval
+    + Request: là Params, Key Long id
+    + API này dùng để xem chi tiết thông tin approval
+    + Role thực hiện: XD
+
+  - API api/xd/reject-approval
+    + Request: là Params, Key Long approvalId và Long approverBy
+    + API này dùng để từ chối thông tin approval
+    + Role thực hiện: XD
+   
+  - API api/lt/create-passport
+    + Request: là Params, Key Long approvalId và Long userId
+    + API này dùng để tạo passport
+    + Role thực hiện: LT
+
+  - API api/lt/all-request-store
+    + Request: là Params, Key int pageNumber và int pageSize
+    + API này dùng để lưu trữ tất cả các yêu cầu
+    + Role thực hiện: LT
+   
+  - API api/lt/reject-passport
+    + Request: là Params, Key Long approvalId và Long userId
+    + API này dùng để từ chối các yêu cầu
+    + Role thực hiện: LT
+
+  - API  api/gs/view-all-log
+    + Request: là Params, Key int pageNumber và int pageSize
+    + API này dùng để xem tất cả các Log
+    + Role thực hiện: 
