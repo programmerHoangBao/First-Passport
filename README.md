@@ -18,8 +18,8 @@
   + ORACLE_DB_PASSWORD	(Mật khẩu cơ sở dữ liệu):	Mật khẩu để xác thực user GROUP5_USER khi kết nối tới Oracle Database.
   + SECRET_KEY	Khóa bí mật (JWT Secret Key)	Dùng để mã hóa và xác thực token JWT trong hệ thống đăng nhập. Đây là chuỗi ngẫu nhiên cần được giữ bí mật tuyệt đối, không chia sẻ công khai.
   + TOKEN_EXPIRATION_MS	Thời gian hết hạn của Access Token (JWT)	Đơn vị mili-giây (ms) — ở đây là 1800000 ms tương đương 30 phút. Sau thời gian này, người dùng phải lấy token mới để tiếp tục truy cập.
-  + REFRESH_EXPIRATION_MS	Thời gian hết hạn của Refresh Token	Cũng tính bằng mili-giây — 604800000 ms tương đương 7 ngày. Dùng để lấy Access Token mới mà không cần đăng nhập lại.
-  + HOST	Máy chủ gửi email	Máy chủ SMTP (ở đây là smtp.gmail.com) dùng để gửi email xác thực, thông báo, hoặc đặt lại mật khẩu.
-  + PORT	Cổng SMTP	Cổng 587 được dùng cho kết nối SMTP qua TLS (bảo mật).
-  + EMAIL	Địa chỉ email của ứng dụng	Địa chỉ Gmail dùng để gửi các email tự động đến người dùng (ví dụ: passport.service@gmail.com).
-  + APP_PASSWORD	Mật khẩu ứng dụng (App Password)	Mật khẩu đặc biệt do Gmail cấp để các ứng dụng có thể gửi email qua SMTP. Không phải mật khẩu Gmail thật, được tạo trong Google Account → Security → App passwords.
+  + REFRESH_EXPIRATION_MS	(Thời gian hết hạn của Refresh Token)	Cũng tính bằng mili-giây — 604800000 ms tương đương 7 ngày. Dùng để lấy Access Token mới mà không cần đăng nhập lại.
+  + HOST	(Máy chủ gửi email)	Máy chủ SMTP (ở đây là smtp.gmail.com) dùng để gửi email xác thực, thông báo, hoặc đặt lại mật khẩu.
+  + PORT	(Cổng SMTP)	Cổng 587 được dùng cho kết nối SMTP qua TLS (bảo mật).
+  + EMAIL	(Địa chỉ email của ứng dụng)	Địa chỉ Gmail dùng để gửi các email tự động đến người dùng (ví dụ: passport.service@gmail.com).
+  + APP_PASSWORD	(Mật khẩu ứng dụng (App Password)):	Mật khẩu đặc biệt do Gmail cấp để các ứng dụng có thể gửi email qua SMTP. Không phải mật khẩu Gmail thật, được tạo trong Google Account → Security → App passwords.
